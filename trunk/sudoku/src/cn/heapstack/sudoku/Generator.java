@@ -140,7 +140,7 @@ public class Generator {
 	public static void main(String[] agrs)
 	{
 		Executer ex = new Executer(Generator.generateSudokuMatirx(10));
-		ex.calculateByOptimizedDES();
+		ex.calculateByOptimizedDFS();
 	}
 
 }

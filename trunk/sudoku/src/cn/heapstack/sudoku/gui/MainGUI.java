@@ -777,7 +777,7 @@ public class MainGUI extends JFrame implements Observer{
 						}
 						
 						Executer ex = new Executer(matrix);
-						ex.calculateByOptimizedDES();
+						ex.calculateByOptimizedDFS();
 						Cell[][] solved = ex.getSolvedSudoku();
 						for(int i=0;i<9;i++)
 						{
