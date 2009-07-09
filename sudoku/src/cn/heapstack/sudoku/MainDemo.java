@@ -44,7 +44,7 @@ public class MainDemo {
 			else
 			{
 				Executer ex = new Executer(init_problem);
-				if(ex.calculateByNormalDES())
+				if(ex.calculateByNormalDFS())
 				{
 //				if(ex.calculateByOptimizedDES())
 //				{

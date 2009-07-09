@@ -25,7 +25,7 @@ public class Executer {
 	 * 使用优化的DES方法解答数独
 	 * @return
 	 */
-	public boolean calculateByOptimizedDES()
+	public boolean calculateByOptimizedDFS()
 	{
 		useOptimizedMethod = true;
 		return calculate();
@@ -35,7 +35,7 @@ public class Executer {
 	 * 使用通常采用的DES方法解答数独
 	 * @return
 	 */
-	public boolean calculateByNormalDES()
+	public boolean calculateByNormalDFS()
 	{
 		useOptimizedMethod = false;
 		return calculate();
@@ -59,7 +59,7 @@ public class Executer {
 		
 		if(!verifyIfSudokuFinished())
 		{
-			tryWithDES(findNextCellToTry());
+			tryWithDFS(findNextCellToTry());
 		}
 		
 		Date end = new Date();
@@ -102,7 +102,7 @@ public class Executer {
 	 * @param c
 	 * @return
 	 */
-	private boolean tryWithDES(Coord c)
+	private boolean tryWithDFS(Coord c)
 	{
 		depth++;
 		
@@ -127,7 +127,7 @@ public class Executer {
 					if(!histroy.isEmpty())
 					{
 						//回溯前一个坐标再次尝试
-						return tryWithDES(histroy.peek());
+						return tryWithDFS(histroy.peek());
 					}
 					else
 					{
@@ -166,7 +166,7 @@ public class Executer {
 					//回溯前一个坐标再次尝试
 					Coord previous = histroy.peek();
 					//System.out.println("previous:"+previous +" is in histroy ? "+histroy.contains(previous));
-					return tryWithDES(previous);
+					return tryWithDFS(previous);
 				}
 				else
 				{
@@ -183,7 +183,7 @@ public class Executer {
 			//System.out.println("Next Cell:"+next );
 			if(next!=null)
 			{
-				return tryWithDES(next);
+				return tryWithDFS(next);
 			}
 			else
 			{
@@ -196,7 +196,7 @@ public class Executer {
 				{
 					//回溯前一个坐标再次尝试
 					Coord previous = histroy.peek();
-					return  tryWithDES(previous);
+					return  tryWithDFS(previous);
 				}
 				else
 				{
