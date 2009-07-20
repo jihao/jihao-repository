@@ -1,15 +1,12 @@
 package cn.heapstack.sudoku.test;
 
 import java.awt.Point;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.ArrayList;
 
 public class Cell {
-
-
 	public Point coordinate;
-	public Queue<Integer> availableValueQueue = new LinkedList<Integer>();
-	int value;
+	public ArrayList<Integer> availableValueArray = new ArrayList<Integer>();
+	public int value;
 	public boolean editable = true;
 
 	public Cell(Point coordinate) {
@@ -25,12 +22,12 @@ public class Cell {
 		this.coordinate = coordinate;
 	}
 
-	public Queue<Integer> getAvailableValueQueue() {
-		return availableValueQueue;
+	public ArrayList<Integer> getAvailableValueArray() {
+		return availableValueArray;
 	}
 
-	public void setAvailableValueQueue(Queue<Integer> availableValueQueue) {
-		this.availableValueQueue = availableValueQueue;
+	public void setAvailableValueArray(ArrayList<Integer> availableValueArray) {
+		this.availableValueArray = availableValueArray;
 	}
 
 	public int getValue() {

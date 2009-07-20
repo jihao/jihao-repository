@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
+/**
+ * The sudoku problem matrix generator, the stupid one
+ * 
+ * @author ehaojii
+ *
+ */
 public class Generator {
 	private static int[] seed = new int[9];
 	private static int[][] matrix = new int[9][9];
@@ -50,19 +56,19 @@ public class Generator {
 	
 		for(int i=3;i<6;i++)
 		{
-			//ÐÐÖÃ»» b5 -> b4
+			//b5 -> b4
 			matrix[3][i-3] = matrix[5][i];
 			matrix[4][i-3] = matrix[3][i];
 			matrix[5][i-3] = matrix[4][i]; 
-			//ÐÐÖÃ»» b5 -> b6
+			//b5 -> b6
 			matrix[3][i+3] = matrix[4][i];
 			matrix[4][i+3] = matrix[5][i];
 			matrix[5][i+3] = matrix[3][i]; 
-			//ÁÐÖÃ»» b5 -> b2
+			//b5 -> b2
 			matrix[i-3][3] = matrix[i][5];
 			matrix[i-3][4] = matrix[i][3];
 			matrix[i-3][5] = matrix[i][4];
-			//ÁÐÖÃ»» b5 -> b8
+			//b5 -> b8
 			matrix[i+3][3] = matrix[i][4];
 			matrix[i+3][4] = matrix[i][5];
 			matrix[i+3][5] = matrix[i][3];
@@ -70,19 +76,19 @@ public class Generator {
 
 		for(int i=3;i<6;i++)
 		{
-			//ÁÐÖÃ»» b4 -> b1			
+			//b4 -> b1			
 			matrix[i-3][0] = matrix[i][1];
 			matrix[i-3][1] = matrix[i][2];
 			matrix[i-3][2] = matrix[i][0];
-			//ÁÐÖÃ»» b4 -> b7
+			//b4 -> b7
 			matrix[i+3][0] = matrix[i][2];
 			matrix[i+3][1] = matrix[i][0];
 			matrix[i+3][2] = matrix[i][1];
-			//ÁÐÖÃ»» b6 -> b3
+			//b6 -> b3
 			matrix[i-3][6] = matrix[i][7];
 			matrix[i-3][7] = matrix[i][8];
 			matrix[i-3][8] = matrix[i][6];			
-			//ÁÐÖÃ»» b6 -> b9
+			//b6 -> b9
 			matrix[i+3][6] = matrix[i][8];
 			matrix[i+3][7] = matrix[i][6];
 			matrix[i+3][8] = matrix[i][7];
@@ -139,8 +145,11 @@ public class Generator {
 	 */
 	public static void main(String[] agrs)
 	{
-		Executer ex = new Executer(Generator.generateSudokuMatirx(10));
-		ex.calculateByOptimizedDFS();
+		int[][] init_problem = Generator.generateSudokuMatirx(10);
+		SudokuCalculator ex = new SudokuCalculator(init_problem);
+		ex.answer();
+		SudokuUtility.printMatrix(ex.getSolvedSudoku());
+		
 	}
 
 }

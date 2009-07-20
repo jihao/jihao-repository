@@ -7,6 +7,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -38,16 +39,18 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import cn.heapstack.gui.util.LookAndFeelManager;
 import cn.heapstack.sudoku.Cell;
-import cn.heapstack.sudoku.Coord;
-import cn.heapstack.sudoku.Executer;
 import cn.heapstack.sudoku.Generator;
+import cn.heapstack.sudoku.SudokuCalculator;
+import cn.heapstack.sudoku.SudokuUtility;
 
 
 public class MainGUI extends JFrame implements Observer{
 
 	private static final long serialVersionUID = 3442781640025318902L;
 
-	private static final String VERSION = "v1.0";
+	private static final String VERSION = "v2.0";
+	private static MainGUI frame = new MainGUI("Sudoku "+ VERSION);
+	
 	
 	private int bigPanelRow = 0;
 	private int bigPanelColumn = 0;
@@ -55,9 +58,9 @@ public class MainGUI extends JFrame implements Observer{
 	private int smallPanelColumn = 0;
 	
 	/**
-	 * The sodoku problem initiate matrix
+	 * The sudoku problem initiate matrix
 	 */
-	private ObservableCell[][] sudoku;
+	private Cell[][] sudoku;
 	
 	/**
 	 * 9 big panels, each contains 9 small CellPanels
@@ -99,15 +102,9 @@ public class MainGUI extends JFrame implements Observer{
 		//LookAndFeelManager.setMotifLookAndFeel();
 		//LookAndFeelManager.setNapkinLookAndFeel();
 		
-		//TODO: Set Thread stack size, use the new thread to do calculate sudoku
-		//Thread startGUI = new Thread(null,new StartGUI(),"StartGUI",1024*50);
-		//startGUI.start();
-		
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run() {
-				MainGUI frame = new MainGUI("Sudoku "+ VERSION);
-				
 				frame.sudoku = frame.generateSudokuCellMatrix();
 				frame.bigPanels = new JPanel[9];
 				frame.cellPanelMatrix = new CellPanel[9][9];
@@ -161,6 +158,14 @@ public class MainGUI extends JFrame implements Observer{
 		}
 	
 	}
+	
+	private class FileAction implements ActionListener {
+		
+		public void actionPerformed(ActionEvent e) {
+			showAbout();
+		}
+	
+	}
 
     /**
      * Shows the about information of this application
@@ -168,13 +173,14 @@ public class MainGUI extends JFrame implements Observer{
     private void showAbout()
     {
         JOptionPane.showMessageDialog(this, 
-                "A small sudoku game application.\r\n\r\n"
-                + "Version "+ MainGUI.VERSION + "\r\nMade in July 2008 by Ji Hao.\r\n"
+        		"A small sudoku game application.\r\n\r\n"
+                + "Version "+ "v1.0" + " Made on July 2008 by Ji Hao.\r\n"
+                + "Version "+ MainGUI.VERSION + " Updated on July 2009 by Ji Hao.\r\n"
                 + "Contact me: jacky.jihao@gmail.com\r\n"
                 + "\r\n"
                 + "\r\n"
-                + "If you need the source code and the upgrade info of this small application\r\n" 
-                + "Please visit: http://www.blogjava.net/jht",
+                + "If you need the source code and the update info of this small application\r\n" 
+                + "Please visit: http://code.google.com/p/jihao-repository/",
                 "About sudoku game", 
                 JOptionPane.INFORMATION_MESSAGE);
     }
@@ -215,12 +221,19 @@ public class MainGUI extends JFrame implements Observer{
 	private JMenuBar buildMenuBar()
 	{
 		JMenuBar menuBar = new JMenuBar();
+		JMenuItem mi = null ;
+		
+		JMenu filemenu = new JMenu("File");
+		mi = new JMenuItem("Open Sudoku Bank");
+		filemenu.add(mi);
+		mi.addActionListener(new FileAction());
+		
 		JMenu lafmenu = new JMenu("Look & Feel");
 		
 		ButtonGroup lafMenuGroup = new ButtonGroup();
 		HashMap<String, String> lafMap = LookAndFeelManager.getLookAndFeelMap();
 		Iterator<String> itr = lafMap.keySet().iterator();
-		JMenuItem mi = null ;
+		
 		while(itr.hasNext())
 		{
 			String key = itr.next();
@@ -237,6 +250,7 @@ public class MainGUI extends JFrame implements Observer{
 		mi.addActionListener(new AboutAction());
 		aboutMenu.add(mi);
 		
+		menuBar.add(filemenu);
 		menuBar.add(lafmenu);
 		menuBar.add(aboutMenu);
 		
@@ -320,18 +334,18 @@ public class MainGUI extends JFrame implements Observer{
 		}
 	}
 	
-	private ObservableCell[][] generateSudokuCellMatrix()
+	private Cell[][] generateSudokuCellMatrix()
 	{
 		int[][] matrix = Generator.generateSudokuMatirx(10);
-		ObservableCell[][] cellMatrix = new ObservableCell[9][9];
+		Cell[][] cellMatrix = new Cell[9][9];
 		
 		for(int i=0;i<9;i++)
 		{
 			for(int j=0;j<9;j++)
 			{
-				cellMatrix[i][j] = new ObservableCell(matrix[i][j]);
-				cellMatrix[i][j].coord.x = i;
-				cellMatrix[i][j].coord.y = j;
+				cellMatrix[i][j] = new Cell(new Point(i,j),matrix[i][j]);
+				cellMatrix[i][j].coordinate.x = i;
+				cellMatrix[i][j].coordinate.y = j;
 				cellMatrix[i][j].addObserver(this);
 			}
 		}
@@ -339,19 +353,10 @@ public class MainGUI extends JFrame implements Observer{
 	}
 
 	public void update(Observable o, Object arg) {
-		ObservableCell source = (ObservableCell)o;
+		Cell source = (Cell)o;
 		
 		boolean isFinished = verifyIfSudokuFinished();
-		if(isFinished)
-		{
-			 int result = JOptionPane.showConfirmDialog(this, "Congratulation, you succeed !!!", "Congratulation", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
-			 if( result == JOptionPane.OK_OPTION )
-			 {
-				System.out.println("[OK], cost:" + getTimeString());
-				t.stop();
-			 }
-		}
-		else
+		if(!isFinished)
 		{
 			verifyInput(source);
 			
@@ -361,12 +366,31 @@ public class MainGUI extends JFrame implements Observer{
 					drawHelpLine(currentHelpNumber);
 			}
 		}
+		else
+		{
+			t.stop();
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					
+					int result = JOptionPane.showConfirmDialog(frame, "Congratulation, you succeed !!!", "Congratulation", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
+					 if( result == JOptionPane.OK_OPTION )
+					 {
+						System.out.println("[OK], cost:" + getTimeString());
+						
+					 }
+					
+				}
+			});
+			 
+		}
 	}
 
-	private void verifyInput(ObservableCell source) {
+	private void verifyInput(Cell source) {
 		clearHighLight();
 		if(cb.isSelected())
-			verifyCoordByHighLight(source.coord);
+			verifyCoordByHighLight(source.coordinate);
 	}
 	
 	private void clearHighLight() {
@@ -376,7 +400,7 @@ public class MainGUI extends JFrame implements Observer{
 			{
 				if(cellPanelMatrix[i][j].getBackground() == Color.yellow)
 				{
-					if(cellPanelMatrix[i][j].cellInfo.editable)
+					if(cellPanelMatrix[i][j].cellInfo.isEditable())
 						cellPanelMatrix[i][j].doHighLight(CellPanel.editableBgColor);
 					else
 						cellPanelMatrix[i][j].doHighLight(CellPanel.notEditableBgColor);
@@ -385,15 +409,15 @@ public class MainGUI extends JFrame implements Observer{
 		}
 	}
 
-	private void verifyCoordByHighLight(Coord c) {
+	private void verifyCoordByHighLight(Point c) {
 		
 		int x = c.x;
 		int y = c.y;
 		//System.out.println(sudoku[x][y].value +"<->"+ cellPanelMatrix[x][y].cellInfo.value);
 		for(int i=0;i<9;i++)
 		{
-			if(sudoku[x][i].value!=0 &&
-					sudoku[x][i].value == cellPanelMatrix[x][y].cellInfo.value)
+			if(sudoku[x][i].getValue()!=0 &&
+					sudoku[x][i].getValue() == cellPanelMatrix[x][y].cellInfo.getValue())
 			{
 				highLightCell(x, i);
 			}
@@ -401,8 +425,8 @@ public class MainGUI extends JFrame implements Observer{
 
 		for(int i=0;i<9;i++)
 		{
-			if(sudoku[i][y].value!=0 &&
-					sudoku[i][y].value == cellPanelMatrix[x][y].cellInfo.value)
+			if(sudoku[i][y].getValue()!=0 &&
+					sudoku[i][y].getValue() == cellPanelMatrix[x][y].cellInfo.getValue())
 			{
 				highLightCell(i, y);
 			}
@@ -414,8 +438,8 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			for(int j=block_colum*3;j<(block_colum+1)*3;j++)
 			{
-				if (sudoku[i][j].value != 0 &&
-						sudoku[i][j].value == cellPanelMatrix[x][y].cellInfo.value)
+				if (sudoku[i][j].getValue() != 0 &&
+						sudoku[i][j].getValue() == cellPanelMatrix[x][y].cellInfo.getValue())
 				{
 					highLightCell(i, j);
 				}
@@ -437,9 +461,24 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			for(int j=0;j<9;j++)
 			{
-				if (cellPanelMatrix[i][j].cellInfo.value == number)
+				if (cellPanelMatrix[i][j].cellInfo.getValue() == number)
 				{
 					drawHelpLine(i,j);
+				}
+			}
+		}
+	}
+	
+	private void clearUserFilledValue()
+	{		
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				if (cellPanelMatrix[i][j].cellInfo.isEditable())
+				{
+					cellPanelMatrix[i][j].cellInfo.setValue(0);
+					cellPanelMatrix[i][j].refreshValue();
 				}
 			}
 		}
@@ -460,8 +499,8 @@ public class MainGUI extends JFrame implements Observer{
 	private void drawHelpLine(int row, int column) {
 		for(int i=0;i<9;i++)
 		{
-			if(cellPanelMatrix[row][i].cellInfo.editable
-					&&cellPanelMatrix[row][i].cellInfo.value==0)
+			if(cellPanelMatrix[row][i].cellInfo.isEditable()
+					&&cellPanelMatrix[row][i].cellInfo.getValue()==0)
 			{
 				cellPanelMatrix[row][i].setDrawHorizontal(true);
 				cellPanelMatrix[row][i].repaint();
@@ -469,8 +508,8 @@ public class MainGUI extends JFrame implements Observer{
 		}
 		for(int i=0;i<9;i++)
 		{
-			if(cellPanelMatrix[i][column].cellInfo.editable
-					&&cellPanelMatrix[i][column].cellInfo.value==0)
+			if(cellPanelMatrix[i][column].cellInfo.isEditable()
+					&&cellPanelMatrix[i][column].cellInfo.getValue()==0)
 			{
 				cellPanelMatrix[i][column].setDrawVertical(true);
 				cellPanelMatrix[i][column].repaint();
@@ -482,8 +521,8 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			for(int j=block_colum*3;j<(block_colum+1)*3;j++)
 			{
-				if(cellPanelMatrix[i][j].cellInfo.editable
-						&&cellPanelMatrix[i][j].cellInfo.value==0)
+				if(cellPanelMatrix[i][j].cellInfo.isEditable()
+						&&cellPanelMatrix[i][j].cellInfo.getValue()==0)
 				{
 					cellPanelMatrix[i][j].setDrawX(true);
 					cellPanelMatrix[i][j].repaint();
@@ -514,9 +553,9 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			for(int j=0;j<9;j++)
 			{
-				if (sudoku[i][j].value != 0)
+				if (sudoku[i][j].getValue() != 0)
 				{
-					set.add(sudoku[i][j].value);
+					set.add(sudoku[i][j].getValue());
 				}
 			}
 			if(set.size()!=9)
@@ -525,9 +564,9 @@ public class MainGUI extends JFrame implements Observer{
 			
 			for(int j=0;j<9;j++)
 			{
-				if (sudoku[j][i].value != 0)
+				if (sudoku[j][i].getValue() != 0)
 				{
-					set.add(sudoku[j][i].value);
+					set.add(sudoku[j][i].getValue());
 				}
 			}
 			if(set.size()!=9)
@@ -543,9 +582,9 @@ public class MainGUI extends JFrame implements Observer{
 				{
 					for(int j=block_colum*3;j<(block_colum+1)*3;j++)
 					{
-						if (sudoku[i][j].value != 0)
+						if (sudoku[i][j].getValue() != 0)
 						{
-							set.add(sudoku[j][i].value);
+							set.add(sudoku[j][i].getValue());
 						}
 					}
 				}
@@ -583,7 +622,7 @@ public class MainGUI extends JFrame implements Observer{
 		return cost;
 	}
 	
-	class ConfigPanel extends JPanel implements ActionListener{
+	class ConfigPanel extends JPanel implements ActionListener,Observer{
 
 		private static final long serialVersionUID = 4100509515122280282L;
 		
@@ -593,6 +632,7 @@ public class MainGUI extends JFrame implements Observer{
 
 		private JButton btnReGenerate = new JButton("New game");
 		private JButton btnAutoSolve = new JButton("Solution");
+		private JButton btnClearUserFilledValue = new JButton("Reset");
 		private JLabel label = new JLabel("Difficulty");
 		
 		private JToggleButton [] buttons = new JToggleButton[9];
@@ -662,7 +702,7 @@ public class MainGUI extends JFrame implements Observer{
 				g.add(b);
 			}
 			
-			//assistantPanel.setBorder(BorderFactory.createTitledBorder("¹¦ÄÜÃæ°å"));
+			//assistantPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"));
 			assistantPanel.setBorder(ImageBorder.generateDefaultImageBorder());
 			assistantPanel.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
@@ -687,7 +727,7 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			textFiledDifficulty.setToolTipText("Please input value between 1 and 10");
 			
-			//miscPanel.setBorder(BorderFactory.createTitledBorder("³öÌâÃæ°å"));
+			//miscPanel.setBorder(BorderFactory.createTitledBorder("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½"));
 			miscPanel.setBorder(ImageBorder.generateDefaultImageBorder());
 			miscPanel.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
@@ -706,11 +746,19 @@ public class MainGUI extends JFrame implements Observer{
 			c.gridy = 2;
 			c.gridwidth = 2;
 			miscPanel.add(btnAutoSolve,c);
+			c.gridx = 0;
+			c.gridy = 3;
+			c.gridwidth = 2;
+			miscPanel.add(btnClearUserFilledValue,c);
+			
+			
 			
 			btnReGenerate.setActionCommand("cmd_ReGenerate");
-			btnAutoSolve.setActionCommand("cmd_AutoSolve");
+			btnAutoSolve.setActionCommand("cmd_Solve");
+			btnClearUserFilledValue.setActionCommand("cmd_Reset");
 			btnReGenerate.addActionListener(this);
 			btnAutoSolve.addActionListener(this);
+			btnClearUserFilledValue.addActionListener(this);
 			
 			this.add(miscPanel);
 		}
@@ -760,49 +808,82 @@ public class MainGUI extends JFrame implements Observer{
 				}
 				reGenerateSodoku(diffValue);
 			}
-			else if(command.compareTo("cmd_AutoSolve")==0)
+			else if(command.compareTo("cmd_Solve")==0)
 			{
-				try
+				cb.setSelected(false);
+				clearUserFilledValue();
+				boolean isFinished = verifyIfSudokuFinished();
+				if(!isFinished)
 				{
-					boolean isFinished = verifyIfSudokuFinished();
-					if(!isFinished)
+					int [][] matrix = new int[9][9];
+					for(int i=0;i<9;i++)
 					{
-						int [][] matrix = new int[9][9];
-						for(int i=0;i<9;i++)
+						for(int j=0;j<9;j++)
 						{
-							for(int j=0;j<9;j++)
-							{
-								matrix[i][j] = sudoku[i][j].value;
-							}
+							matrix[i][j] = sudoku[i][j].getValue();
 						}
-						
-						Executer ex = new Executer(matrix);
-						ex.calculateByOptimizedDFS();
-						Cell[][] solved = ex.getSolvedSudoku();
-						for(int i=0;i<9;i++)
+					}
+					
+					SudokuCalculator ex = new SudokuCalculator(matrix);
+					ex.addObserver(this);
+					ex.answer();
+					
+				}
+				cb.setSelected(true);
+				
+			}else if(command.compareTo("cmd_Reset")==0)
+			{
+				clearUserFilledValue();
+			}
+			
+			// END else if
+			
+		} //END actionPerformed
+
+		@Override
+		public void update(Observable o, Object arg) {
+			if( o instanceof SudokuCalculator)
+			{
+				Cell[][] solved = ((SudokuCalculator) o).getSolvedSudoku();
+				boolean succeed = SudokuUtility.verifyIfSudokuFinished(solved);
+				if(succeed)
+				{
+					for(int i=0;i<9;i++)
+					{
+						for(int j=0;j<9;j++)
 						{
-							for(int j=0;j<9;j++)
+							if(cellPanelMatrix[i][j].cellInfo.getValue() != solved[i][j].getValue())
 							{
-								if(cellPanelMatrix[i][j].cellInfo.value != solved[i][j].value)
-								{
-									cellPanelMatrix[i][j].cellInfo.value = solved[i][j].value;
-									cellPanelMatrix[i][j].updateValue();
-								}
+								cellPanelMatrix[i][j].cellInfo.setValue(solved[i][j].getValue());
+								cellPanelMatrix[i][j].updateValue();
 							}
 						}
 					}
 				}
-				catch(java.lang.StackOverflowError ex)
+				else
 				{
-					JOptionPane.showConfirmDialog(this, 
-							" StackOverflowError !!!"+"\n\r\t\n\r\t"+
-							"You can solve this problem by specify -Xss option when start JVM\n\r\t" +
-							"\r\tFor example: Java -Xss50m -cp sodoku.jar cn.heapstack.sudoku.gui.MainGUI"
-							, "Exception", JOptionPane.OK_OPTION,JOptionPane.WARNING_MESSAGE );
+					t.stop();
+					SwingUtilities.invokeLater(new Runnable() {
+						
+						@Override
+						public void run() {
+							
+							int result = JOptionPane.showConfirmDialog(frame, "Sorry, no answer !!!", "Failed", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
+							 if( result == JOptionPane.OK_OPTION )
+							 {
+								System.out.println("[OK], cost:" + getTimeString());
+								
+							 }
+							
+						}
+					});
 				}
-			} // END else if
+				
+				
+				 
+			}
 			
-		} //END actionPerformed
+		}
 	} // END ConfigPanel
 
 	

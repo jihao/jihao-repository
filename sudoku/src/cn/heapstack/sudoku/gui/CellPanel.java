@@ -17,6 +17,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import cn.heapstack.sudoku.Cell;
+
 
 public class CellPanel extends JPanel {
 
@@ -30,7 +32,7 @@ public class CellPanel extends JPanel {
 	private StyledDocument docOutput = new RegexStyledDocument("^[1-9]|\\" + promoteString + "$", styleAttributes);
 
 	
-	public ObservableCell cellInfo;
+	public Cell cellInfo;
 	
 	private boolean drawHorizontal = false;
 	private boolean drawVertical = false;
@@ -42,8 +44,8 @@ public class CellPanel extends JPanel {
 		initListeners();
 	}
 
-	public CellPanel(ObservableCell cell) {
-		this(cell.value);
+	public CellPanel(Cell cell) {
+		this(cell.getValue());
 		this.cellInfo = cell;
 	}
 
@@ -82,8 +84,8 @@ public class CellPanel extends JPanel {
 	}
 
 /*	*//**
-	 * ×¢ÒâÕâÀïÖØÔØpaintComponent·½·¨,
-	 * Èç¹ûÖØÔØpaint·½·¨,clild ×é¼þ²»ÄÜÏÔÊ¾
+	 * ×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½paintComponentï¿½ï¿½ï¿½ï¿½,
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½paintï¿½ï¿½ï¿½ï¿½,clild ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
 	 *//*
 	public void paintComponent(Graphics g) {
 		super.paintComponents(g);
@@ -135,12 +137,12 @@ public class CellPanel extends JPanel {
 	}
 	
 	/**
-	 * Called by regenerate soduku
+	 * Called by regenerate soduku and reset
 	 */
 	public void refreshValue()
 	{
 		try {
-			if(this.cellInfo.value==0)
+			if(this.cellInfo.getValue()==0)
 			{
 				docOutput.insertString(docOutput.getLength(),String.valueOf('_'), styleAttributes);
 				
@@ -150,7 +152,7 @@ public class CellPanel extends JPanel {
 			}
 			else
 			{
-				docOutput.insertString(docOutput.getLength(),String.valueOf(this.cellInfo.value), styleAttributes);
+				docOutput.insertString(docOutput.getLength(),String.valueOf(this.cellInfo.getValue()), styleAttributes);
 				textPane.setEditable(false);
 				textPane.setBackground(notEditableBgColor);
 				this.setBackground(notEditableBgColor);
@@ -168,7 +170,7 @@ public class CellPanel extends JPanel {
 	public void updateValue()
 	{
 		try {
-			docOutput.insertString(docOutput.getLength(),String.valueOf(this.cellInfo.value), styleAttributes);
+			docOutput.insertString(docOutput.getLength(),String.valueOf(this.cellInfo.getValue()), styleAttributes);
 		} catch (BadLocationException e) {
 			e.printStackTrace();
 		}
@@ -189,11 +191,6 @@ public class CellPanel extends JPanel {
 	{
 		textPane.setBackground(c);
 		this.setBackground(c);
-	}
-	
-	private void notifyCellObservers() {
-		cellInfo.setChanged();
-		cellInfo.notifyObservers();
 	}
 	
 	public boolean isDrawHorizontal() {
@@ -240,14 +237,11 @@ public class CellPanel extends JPanel {
 				{
 					value = Integer.parseInt(current);
 				}
-				cellInfo.value = value;
-				notifyCellObservers();
-				
+				cellInfo.setValue( value );
+				textPane.repaint();
 			} catch (BadLocationException e1) {
 				e1.printStackTrace();
 			}
-			
-			textPane.repaint();
 		}
 
 		
@@ -320,8 +314,7 @@ public class CellPanel extends JPanel {
 								docOutput.insertString(0,
 										String.valueOf(nextValue), styleAttributes);
 							}
-							cellInfo.value = nextValue;
-							notifyCellObservers();
+							cellInfo.setValue( nextValue );
 						}
 					} catch (BadLocationException e1) {
 						e1.printStackTrace();
@@ -355,8 +348,7 @@ public class CellPanel extends JPanel {
 										String.valueOf(nextValue), styleAttributes);
 							}
 							
-							cellInfo.value = nextValue;
-							notifyCellObservers();
+							cellInfo.setValue(nextValue);
 						}
 					} catch (BadLocationException e1) {
 						e1.printStackTrace();
