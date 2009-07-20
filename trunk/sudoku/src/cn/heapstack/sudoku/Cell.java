@@ -1,85 +1,79 @@
 package cn.heapstack.sudoku;
 
+import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Observable;
 
-public class Cell {
+public class Cell extends Observable implements Serializable{
+	private static final long serialVersionUID = -1509623841348906493L;
 	
-	public int value = 0;
-	public boolean editable = false;//默认值该单元格是不可编辑的
-	public boolean seedNotOkFlag = false;//这个标志用来区分此单元格能不能填入目标值(seed)
-	public Coord coord = new Coord();
-	public ArrayList<Integer> valideValueArray = new ArrayList<Integer>();
+	public Point coordinate;
+	public ArrayList<Integer> availableValueArray = new ArrayList<Integer>();
+	private int value;
+	private boolean editable = true;
 
-	/**
-	 * 构造函数
-	 * 如果单元格的值初始化的时候为非零值，
-	 * 		表示这个单元格是不可编辑的,
-	 * 		且当前尝试的seed是不能填入这个单元格的
-	 * @param value
-	 */
-	public Cell(int value)
-	{
+	public Cell(Point coordinate, int value) {
+		super();
+		this.coordinate = coordinate;
 		this.value = value;
+		if(this.value!=0)
+		{
+			this.editable = false;
+		}
+	}
+
+	public Cell(Point coordinate) {
+		super();
+		this.coordinate = coordinate;
+	}
+	
+	public Point getCoordinate() {
+		return coordinate;
+	}
+
+	public void setCoordinate(Point coordinate) {
+		this.coordinate = coordinate;
+	}
+
+	public ArrayList<Integer> getAvailableValueArray() {
+		return availableValueArray;
+	}
+
+	public void setAvailableValueArray(ArrayList<Integer> availableValueArray) {
+		this.availableValueArray = availableValueArray;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		if(this.value != value)
+		{
+			this.value = value;
+			this.setChanged();
+			this.notifyObservers();
+		}
+	}
+
+	public boolean isEditable() {
+		return editable;
+	}
+
+	@Override
+	public String toString() {
+		return "Cell [coordinate=" + coordinate + ", editable=" + editable
+				+ ", value=" + value + "]";
+	}
+
+	public void resetValue(int i) {
+		this.editable = false;
+		this.value = i;
 		if(value==0)
 		{
 			this.editable = true;
 		}
-		else
-		{
-			this.seedNotOkFlag = true;
-		}
-	}
-	
-	public Cell(Cell copy)
-	{
-		copyFrom(copy);
-	}
-	
-	public String toString()
-	{
-		return this.value+" - "+this.editable+" - "+this.seedNotOkFlag+" | ";
-		
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-		{
-			System.out.println("RETUEN");
-			return true;
-		}
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Cell other = (Cell) obj;
-		if (coord == null) {
-			if (other.coord != null)
-				return false;
-		} else if (!coord.equals(other.coord))
-			return false;
-		if (editable != other.editable)
-			return false;
-		if (seedNotOkFlag != other.seedNotOkFlag)
-			return false;
-		if (value != other.value)
-			return false;
-		if(valideValueArray.size()!=other.valideValueArray.size())
-			return false;
-		if(!valideValueArray.containsAll(other.valideValueArray))
-			return false;
-		return true;
-	}
-
-	public final void copyFrom(Cell from)
-	{
-		this.value = from.value;
-		this.editable = from.editable;
-		this.seedNotOkFlag = from.seedNotOkFlag;
-		
-		this.coord.x = from.coord.x;
-		this.coord.y = from.coord.y;
-		this.valideValueArray.clear();
-		this.valideValueArray.addAll(from.valideValueArray);
+		this.availableValueArray.clear();
 	}
 }

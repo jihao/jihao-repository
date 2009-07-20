@@ -43,11 +43,9 @@ public class MainDemo {
 			}
 			else
 			{
-				Executer ex = new Executer(init_problem);
-				if(ex.calculateByNormalDFS())
+				SudokuCalculator ex = new SudokuCalculator(init_problem);
+				if(ex.answer())
 				{
-//				if(ex.calculateByOptimizedDES())
-//				{
 					System.out.println("\r\r$_$_$_$_$_$_$_$ SUCCEED $_$_$_$_$_$_$_$");
 					SudokuUtility.printMatrix(ex.getSolvedSudoku());
 				}

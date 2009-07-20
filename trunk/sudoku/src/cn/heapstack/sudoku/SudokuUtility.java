@@ -1,18 +1,199 @@
 package cn.heapstack.sudoku;
 
+import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class SudokuUtility {
+	
+	/**
+	 * verify if the sudoku was finished
+	 * @param sudoku
+	 * @return
+	 */
+	public static boolean verifyIfSudokuFinished(Cell[][] sudoku) {
+		HashSet<Integer> set = new HashSet<Integer>();
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				if (sudoku[i][j].getValue() != 0)
+				{
+					set.add(sudoku[i][j].getValue());
+				}
+			}
+			if(set.size()!=9)
+				return false;
+			set.clear();
+			
+			for(int j=0;j<9;j++)
+			{
+				if (sudoku[j][i].getValue() != 0)
+				{
+					set.add(sudoku[j][i].getValue());
+				}
+			}
+			if(set.size()!=9)
+				return false;
+			set.clear();
+		}
+		
+		for(int block_row=0;block_row<3;block_row++)
+		{
+			for(int block_colum=0;block_colum<3;block_colum++)
+			{
+				for(int i=block_row*3;i<(block_row+1)*3;i++)
+				{
+					for(int j=block_colum*3;j<(block_colum+1)*3;j++)
+					{
+						if (sudoku[i][j].getValue() != 0)
+						{
+							set.add(sudoku[i][j].getValue());
+						}
+					}
+				}
+			}
+		}
+		if(set.size()!=9)
+			return false;
+		set.clear();
+		
+		return true;
+	}
+	
+	/**
+	 * verify if the matrix is the valid sudoku matrix
+	 * 
+	 * @param matrix
+	 * @return
+	 */
+	public static boolean verifyMatrix(Cell[][] matrix) {
+		if (matrix == null)
+			return false;
 
+		int row = matrix.length;
+		if (row != 9)
+			return false;
+
+		for (int i = 0; i < row; i++) {
+			if (matrix[i].length != 9)
+				return false;
+		}
+
+		HashSet<Integer> set = new HashSet<Integer>();
+		for (int i = 0; i < 9; i++) {
+			for (int j = 0; j < 9; j++) {
+				if (matrix[i][j].getValue() < 0 || matrix[i][j].getValue() > 9)
+					return false;
+				else {
+					if (matrix[i][j].getValue() != 0) {
+						if (!set.add(matrix[i][j].getValue())) {
+							return false;
+						}
+					}
+				}
+			}
+			set.clear();
+
+			for (int j = 0; j < 9; j++) {
+				if (matrix[j][i].getValue() < 0 || matrix[j][i].getValue() > 9) {
+					return false;
+				} else {
+					if (matrix[j][i].getValue() != 0) {
+						if (!set.add(matrix[j][i].getValue())) {
+							return false;
+						}
+					}
+				}
+			}
+			set.clear();
+		}
+
+		for (int block_row = 0; block_row < 3; block_row++) {
+			for (int block_colum = 0; block_colum < 3; block_colum++) {
+				for (int i = block_row * 3; i < (block_row + 1) * 3; i++) {
+					for (int j = block_colum * 3; j < (block_colum + 1) * 3; j++) {
+						if (matrix[i][j].getValue() < 0 || matrix[i][j].getValue() > 9)
+							return false;
+						else {
+							if (matrix[i][j].getValue() != 0) {
+								if (!set.add(matrix[i][j].getValue()))
+									return false;
+							}
+						}
+					}
+				}
+				set.clear();
+			}
+		}
+
+		return true;
+	}
+	
+	/**
+	 * calculate the available values for the current cell
+	 * 
+	 * @param current - current cell
+	 * @param sudoku - the matrix
+	 * @return available integer values array
+	 */
+	public static ArrayList<Integer> getValidCellValue(Cell current,Cell[][] sudoku)
+	{
+		Point c = current.getCoordinate();
+		//System.out.println("row: "+row+" column:"+column);
+		ArrayList<Integer> set = new ArrayList<Integer>();
+		for(int i=1;i<10;i++)
+		{
+			set.add(i);
+		}
+		
+		ArrayList<Integer> existed = new ArrayList<Integer>();		
+		for(int i=0;i<9;i++)
+		{
+			//System.out.print(" & "+sudoku[row][i].getValue());
+			if (sudoku[c.x][i].getValue() != 0)
+				existed.add(sudoku[c.x][i].getValue());
+		}
+		//System.out.println();
+		for(int i=0;i<9;i++)
+		{
+			//System.out.print(" % "+sudoku[i][column].getValue());
+			if(sudoku[i][c.y].getValue() != 0)
+				existed.add(sudoku[i][c.y].getValue());
+		}
+		
+		//System.out.println();
+		
+		int block_row = c.x/3;
+		int block_colum = c.y/3;
+		for(int i=block_row*3;i<(block_row+1)*3;i++)
+		{
+			for(int j=block_colum*3;j<(block_colum+1)*3;j++)
+			{
+				//System.out.print(" $ "+sudoku[i][j].getValue());
+				if(sudoku[i][j].getValue()!=0)
+					existed.add(sudoku[i][j].getValue());
+			}
+		}
+		//System.out.println();
+		//System.out.println(set);
+		//System.out.println(existed);
+		
+		 set.removeAll(existed);
+		 //System.out.println("OK values:"+set);
+		 return set;
+	}
+	
+	
 	/**
 	 * <p>
-	 * ´Ó×ÔÈ»Ë³Ðò±íÊ¾µÄ¾ØÕó×Ö·û´®¹¹½¨¾ØÕó
+	 * ï¿½ï¿½ï¿½ï¿½È»Ë³ï¿½ï¿½ï¿½Ê¾ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * </p>
 	 * 
 	 * @param input
-	 *            ³¤¶ÈÎª81µÄÓÃ×ÔÈ»Ë³Ðò±íÊ¾µÄ¾ØÕó×Ö·û´® <br/> example:061030800009050000000000045007010300090240500010600004000400009050000102302000000
+	 *            ï¿½ï¿½ï¿½ï¿½Îª81ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È»Ë³ï¿½ï¿½ï¿½Ê¾ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ <br/> example:061030800009050000000000045007010300090240500010600004000400009050000102302000000
 	 * 
-	 * @return Èç¹ûÊäÈëºÏ·¨£¬Ôò·µ»Ø¹¹½¨µÄ¾ØÕó£¬·ñÔò·µ»Ø empty array
+	 * @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ò·µ»Ø¹ï¿½ï¿½ï¿½ï¿½Ä¾ï¿½ï¿½ó£¬·ï¿½ï¿½ò·µ»ï¿½ empty array
 	 */
 	public static int[][] buildMatrix(String inputParam) {
 		String input = inputParam;
@@ -36,11 +217,11 @@ public class SudokuUtility {
 	}
 
 	/**
-	 * ½«¾ØÕóÌâÄ¿°´ÕÕ×ÔÈ»Ë³Ðòµ¼³ö³ÉÓÉ81¸öÊý×Ö×é³ÉµÄ×Ö·û´®
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È»Ë³ï¿½òµ¼³ï¿½ï¿½ï¿½ï¿½ï¿½81ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½Ö·ï¿½
 	 * 
 	 * @param matrix
-	 *            ÊäÈë¾ØÕó
-	 * @return ÈçºÎÊäÈëºÏ·¨Ôò·µ»Øµ¼³öµÄ×Ö·û´®£¬·ñÔò·µ»Ønull
+	 *            ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * @return ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ï¿½ò·µ»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ò·µ»ï¿½null
 	 */
 	public static String exportMatrix2String(int[][] matrix) {
 		if (matrix != null) {
@@ -58,11 +239,11 @@ public class SudokuUtility {
 	}
 
 	/**
-	 * ÑéÖ¤ÊäÈë¾ØÕóÌâÄ¿ÊÇ·ñºÏ·¨
+	 * ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½Ç·ï¿½Ï·ï¿½
 	 * 
 	 * @param matrix
-	 *            ÊäÈë¾ØÕó
-	 * @return ºÏ·¨·µ»Ø true,·ñÔò·µ»Ø false
+	 *            ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * @return ï¿½Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ true,ï¿½ï¿½ï¿½ò·µ»ï¿½ false
 	 */
 	public static boolean verifyMatrix(int[][] matrix) {
 		if (matrix == null)
@@ -84,7 +265,7 @@ public class SudokuUtility {
 					return false;
 				else {
 					if (matrix[i][j] != 0) {
-						// ÐÐÓÐÏàÍ¬µÄÔªËØ£¬ÔòÊäÈë¾ØÕó·Ç·¨
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½Ôªï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½
 						if (!set.add(matrix[i][j])) {
 							return false;
 						}
@@ -98,7 +279,7 @@ public class SudokuUtility {
 					return false;
 				} else {
 					if (matrix[j][i] != 0) {
-						// ÁÐÓÐÏàÍ¬µÄÔªËØ£¬ÔòÊäÈë¾ØÕó·Ç·¨
+						// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½Ôªï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½
 						if (!set.add(matrix[j][i])) {
 							return false;
 						}
@@ -116,7 +297,7 @@ public class SudokuUtility {
 							return false;
 						else {
 							if (matrix[i][j] != 0) {
-								// ¾Å¹¬¸ñÓÐÏàÍ¬µÄÔªËØ£¬ÔòÊäÈë¾ØÕó·Ç·¨
+								// ï¿½Å¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½Ôªï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½
 								if (!set.add(matrix[i][j]))
 									return false;
 							}
@@ -130,9 +311,7 @@ public class SudokuUtility {
 		return true;
 	}
 	
-	/**
-	 * ´òÓ¡Êý¶À
-	 */
+
 	public static void printMatrix(int[][] matrix) {
 		System.out.println("_____________________________________");
 		for(int i=0;i<9;i++)
@@ -147,9 +326,7 @@ public class SudokuUtility {
 		System.out.println("_____________________________________");
 	}
 	
-	/**
-	 * ´òÓ¡Êý¶À
-	 */
+
 	public static void printMatrix(char[][] matrix) {
 		System.out.println("_____________________________________");
 		for(int i=0;i<9;i++)
@@ -163,9 +340,7 @@ public class SudokuUtility {
 		}
 		System.out.println("_____________________________________");
 	}
-	/**
-	 * ´òÓ¡Êý¶À
-	 */
+
 	public static void printMatrix(Cell[][] matrix) {
 		System.out.println("_____________________________________");
 		for(int i=0;i<9;i++)
@@ -173,7 +348,7 @@ public class SudokuUtility {
 			System.out.print("|");
 			for(int j=0;j<9;j++)
 			{
-				System.out.print(" "+matrix[i][j].value+" |");
+				System.out.print(" "+matrix[i][j].getValue()+" |");
 			}
 			System.out.println();
 		}

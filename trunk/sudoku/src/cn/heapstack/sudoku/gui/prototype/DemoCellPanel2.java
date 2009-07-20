@@ -3,6 +3,7 @@ package cn.heapstack.sudoku.gui.prototype;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -21,8 +22,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import cn.heapstack.gui.util.LookAndFeelManager;
+import cn.heapstack.sudoku.Cell;
 import cn.heapstack.sudoku.gui.CellPanel;
-import cn.heapstack.sudoku.gui.ObservableCell;
 
 public class DemoCellPanel2 extends JFrame{
 
@@ -44,13 +45,13 @@ public class DemoCellPanel2 extends JFrame{
 
 		frame.setJMenuBar(frame.buildMenuBar());
 		
-		CellPanel cellPanel = new CellPanel(new ObservableCell(0));
+		CellPanel cellPanel = new CellPanel(new Cell(new Point(),0));
 		cellPanel.setDrawX(true);
 
-		CellPanel cellPanel2 = new CellPanel(new ObservableCell(1));
+		CellPanel cellPanel2 = new CellPanel(new Cell(new Point(),1));
 		cellPanel2.setDrawHorizontal(true);
 
-		CellPanel cellPanel3 = new CellPanel(new ObservableCell(2));
+		CellPanel cellPanel3 = new CellPanel(new Cell(new Point(),2));
 		cellPanel3.setDrawVertical(true);
 
 		frame.getContentPane().setLayout(new GridLayout(3, 3));
