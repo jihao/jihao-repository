@@ -52,7 +52,7 @@ public class Generator {
 		}
 		
 		System.out.println("[Generator][DEBUG] - before generate complete Sudoku matrix:");
-		SudokuUtility.printMatrix(matrix);
+		SudokuMatrixUtility.printMatrix(matrix);
 	
 		for(int i=3;i<6;i++)
 		{
@@ -96,7 +96,7 @@ public class Generator {
 		
 
 		System.out.println("[Generator][DEBUG] - after generate complete Sudoku matrix:");
-		SudokuUtility.printMatrix(matrix);
+		SudokuMatrixUtility.printMatrix(matrix);
 	}
 	
 	
@@ -133,7 +133,7 @@ public class Generator {
 		
 		System.out.println("[Generator][DEBUG] - difficult level: "+difficultLevel+", hide: "+hideCount+" cells");
 		System.out.println("[Generator][DEBUG] - Sudoku matrix:");
-		SudokuUtility.printMatrix(matrix);
+		SudokuMatrixUtility.printMatrix(matrix);
 		
 		return matrix;
 	}
@@ -148,7 +148,7 @@ public class Generator {
 		int[][] init_problem = Generator.generateSudokuMatirx(10);
 		SudokuCalculator ex = new SudokuCalculator(init_problem);
 		ex.answer();
-		SudokuUtility.printMatrix(ex.getSolvedSudoku());
+		SudokuMatrixUtility.printMatrix(ex.getSolvedSudoku());
 		
 	}
 

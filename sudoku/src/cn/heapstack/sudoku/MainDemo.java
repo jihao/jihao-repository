@@ -36,7 +36,7 @@ public class MainDemo {
 		
 		if(args.length==1)
 		{			
-			int[][] init_problem = SudokuUtility.buildMatrix(args[0]);
+			int[][] init_problem = SudokuMatrixUtility.buildMatrix(args[0]);
 			if(init_problem.length==0)
 			{
 				System.out.println("Invalid parameter");
@@ -47,7 +47,7 @@ public class MainDemo {
 				if(ex.answer())
 				{
 					System.out.println("\r\r$_$_$_$_$_$_$_$ SUCCEED $_$_$_$_$_$_$_$");
-					SudokuUtility.printMatrix(ex.getSolvedSudoku());
+					SudokuMatrixUtility.printMatrix(ex.getSolvedSudoku());
 				}
 			}
 		}
