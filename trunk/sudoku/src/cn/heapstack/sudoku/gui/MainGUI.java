@@ -22,6 +22,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -41,7 +42,7 @@ import cn.heapstack.gui.util.LookAndFeelManager;
 import cn.heapstack.sudoku.Cell;
 import cn.heapstack.sudoku.Generator;
 import cn.heapstack.sudoku.SudokuCalculator;
-import cn.heapstack.sudoku.SudokuUtility;
+import cn.heapstack.sudoku.SudokuMatrixUtility;
 
 
 public class MainGUI extends JFrame implements Observer{
@@ -49,7 +50,7 @@ public class MainGUI extends JFrame implements Observer{
 	private static final long serialVersionUID = 3442781640025318902L;
 
 	private static final String VERSION = "v2.0";
-	private static MainGUI frame = new MainGUI("Sudoku "+ VERSION);
+	public static MainGUI frame = new MainGUI("Sudoku "+ VERSION);
 	
 	
 	private int bigPanelRow = 0;
@@ -86,8 +87,27 @@ public class MainGUI extends JFrame implements Observer{
 	private int currentHelpNumber = -1;
 	
 	
+	//**************************************************
+	//
+	//**************************************************
+	private HashMap<String , Question> sudokuBankMap = new HashMap<String, Question>();
+	
+	public HashMap<String, Question> getSudokuBankMap() {
+		return sudokuBankMap;
+	}
+
+
 	public MainGUI(String string) {
 		super(string);
+		init();
+	}
+
+	private void init() {
+		
+		SudokuBankFileUtility instance = SudokuBankFileUtility.getInstance();
+		instance.initSudokuBank(sudokuBankMap);
+		
+		
 	}
 
 	/**
@@ -162,7 +182,16 @@ public class MainGUI extends JFrame implements Observer{
 	private class FileAction implements ActionListener {
 		
 		public void actionPerformed(ActionEvent e) {
-			showAbout();
+			showSudokuBankDialog();
+		}
+
+		private void showSudokuBankDialog() {
+			SudokuBankDialog sudokuBank = new SudokuBankDialog(frame);
+			
+            sudokuBank.setBounds(frame.getLocation().x, frame.getLocation().y, 780, 600);
+            sudokuBank.setVisible(true);
+            sudokuBank.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+			
 		}
 	
 	}
@@ -377,7 +406,7 @@ public class MainGUI extends JFrame implements Observer{
 					int result = JOptionPane.showConfirmDialog(frame, "Congratulation, you succeed !!!", "Congratulation", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
 					 if( result == JOptionPane.OK_OPTION )
 					 {
-						System.out.println("[OK], cost:" + getTimeString());
+						System.out.println("[OK], cost:" + MathUtility.getTimeString(timeCounter));
 						
 					 }
 					
@@ -532,10 +561,25 @@ public class MainGUI extends JFrame implements Observer{
 		
 	}
 
-	public void reGenerateSodoku(int diffValue)
+	public void reGenerateSudokuQuestion(int diffValue)
 	{
 		int[][] matrix = Generator.generateSudokuMatirx(diffValue);
+		loadMatrix(matrix);
 		
+	}
+	
+	public void loadSudokuQuestion(int level, int subLevel)
+	{
+		timeCounter = 0;
+		t.start();
+		
+		Question q = sudokuBankMap.get(level+"-"+subLevel);
+		int[][] matrix = SudokuMatrixUtility.buildMatrix(q.getInitProblem());
+		loadMatrix(matrix);
+	}
+	
+	private void loadMatrix(int[][] matrix)
+	{
 		for(int i=0;i<9;i++)
 		{
 			for(int j=0;j<9;j++)
@@ -597,30 +641,7 @@ public class MainGUI extends JFrame implements Observer{
 		return true;
 	}
 	
-	private String getTimeString() {
-		int s = timeCounter%60;
-		int m = (timeCounter/60)%60;
-		int h = (timeCounter/3600)%60;
-		String cost = "";
-		if(h<10)
-		{
-			cost = cost.concat("0");
-		}
-		cost = cost.concat(String.valueOf(h));
-		cost = cost.concat(":");
-		if(m<10)
-		{
-			cost = cost.concat("0");
-		}
-		cost = cost.concat(String.valueOf(m));
-		cost = cost.concat(":");
-		if(s<10)
-		{
-			cost = cost.concat("0");
-		}
-		cost = cost.concat(String.valueOf(s));
-		return cost;
-	}
+
 	
 	class ConfigPanel extends JPanel implements ActionListener,Observer{
 
@@ -660,7 +681,7 @@ public class MainGUI extends JFrame implements Observer{
 				public void actionPerformed(ActionEvent e) {
 		
 					timeCounter++;
-					String cost = getTimeString();
+					String cost = MathUtility.getTimeString(timeCounter);
 					
 					labelTime.setText("      ".concat(cost));//Just for better UI
 				}
@@ -702,7 +723,7 @@ public class MainGUI extends JFrame implements Observer{
 				g.add(b);
 			}
 			
-			//assistantPanel.setBorder(BorderFactory.createTitledBorder("�������"));
+			//assistantPanel.setBorder(BorderFactory.createTitledBorder("锟斤拷锟斤拷锟斤拷锟�));
 			assistantPanel.setBorder(ImageBorder.generateDefaultImageBorder());
 			assistantPanel.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
@@ -727,7 +748,7 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			textFiledDifficulty.setToolTipText("Please input value between 1 and 10");
 			
-			//miscPanel.setBorder(BorderFactory.createTitledBorder("�������"));
+			//miscPanel.setBorder(BorderFactory.createTitledBorder("锟斤拷锟斤拷锟斤拷锟�));
 			miscPanel.setBorder(ImageBorder.generateDefaultImageBorder());
 			miscPanel.setLayout(new GridBagLayout());
 			GridBagConstraints c = new GridBagConstraints();
@@ -806,7 +827,7 @@ public class MainGUI extends JFrame implements Observer{
 					if(diffValue<1 || diffValue>10)
 						diffValue = 5;
 				}
-				reGenerateSodoku(diffValue);
+				reGenerateSudokuQuestion(diffValue);
 			}
 			else if(command.compareTo("cmd_Solve")==0)
 			{
@@ -845,7 +866,7 @@ public class MainGUI extends JFrame implements Observer{
 			if( o instanceof SudokuCalculator)
 			{
 				Cell[][] solved = ((SudokuCalculator) o).getSolvedSudoku();
-				boolean succeed = SudokuUtility.verifyIfSudokuFinished(solved);
+				boolean succeed = SudokuMatrixUtility.verifyIfSudokuFinished(solved);
 				if(succeed)
 				{
 					for(int i=0;i<9;i++)
@@ -871,10 +892,9 @@ public class MainGUI extends JFrame implements Observer{
 							int result = JOptionPane.showConfirmDialog(frame, "Sorry, no answer !!!", "Failed", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
 							 if( result == JOptionPane.OK_OPTION )
 							 {
-								System.out.println("[OK], cost:" + getTimeString());
+								System.out.println("[OK], cost:" + MathUtility.getTimeString(timeCounter));
 								
 							 }
-							
 						}
 					});
 				}

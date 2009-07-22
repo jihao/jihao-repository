@@ -6,18 +6,17 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 public class SudokuBankDialog extends JDialog {
 
@@ -25,15 +24,18 @@ public class SudokuBankDialog extends JDialog {
 	private JTabbedPane tabPane = new JTabbedPane();
     private JButton cmdOk = new JButton(new OkAction());
     private JButton cmdCancel = new JButton(new CancelAction());
-    
-	public SudokuBankDialog(JFrame parent)
+    private MainGUI mainGUI;
+    private int selected_level = 1;
+	private int selected_subLevel = 1;
+	
+	public SudokuBankDialog(MainGUI mainGUI)
 	{
-		super(parent,"Sudoku Bank",true);
-		
+		super(mainGUI,"Sudoku Bank",true);
+		this.mainGUI = mainGUI;
 
         this.getContentPane().setLayout(new BorderLayout());
         
-        initDefaultSettings();
+        
         intiTabs();
         initOKCancelButtons();
 
@@ -47,43 +49,6 @@ public class SudokuBankDialog extends JDialog {
         updateGui();
 	}
 
-	public static void main(String[] args)
-    {
-        SwingUtilities.invokeLater(new Runnable()
-        {
-
-            public void run()
-            {
-                try
-                {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                }
-                catch (Exception ignore)
-                {
-                }
-                
-                JFrame parent = new JFrame("Setting Panel");
-                parent.setBounds(10, 10, 800, 800);
-                parent.setVisible(true);
-
-                parent.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-                SudokuBankDialog sudokuBank = new SudokuBankDialog(parent);
-                sudokuBank.setBounds(10, 10, 800, 800);
-                sudokuBank.setVisible(true);
-                sudokuBank.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-            }
-
-        });
-
-    }
-	
-	private void initDefaultSettings()
-    {
-        
-        //Settings settings = Settings.getInstance();
-        
-    }
 
     private void intiTabs()
     {
@@ -91,15 +56,48 @@ public class SudokuBankDialog extends JDialog {
         {
         	JPanel levelPanel = new JPanel();
         	levelPanel.setLayout(new GridLayout(9, 9));
+        	ButtonGroup bg = new ButtonGroup();
         	for(int subLevel=1;subLevel<82;subLevel++)
         	{
         		JPanel subLevelPanel = new JPanel();
-   				subLevelPanel.setBorder(BorderFactory.createEtchedBorder(Color.white, Color.gray));        		
-        		subLevelPanel.add(new JCheckBox(level+"-"+subLevel));
-        		subLevelPanel.add(new JLabel("time : 01:25:48"));
-        		if(subLevel%3==0)
-        			subLevelPanel.setBackground(Color.yellow);
-        		levelPanel.add(subLevelPanel);
+        		JRadioButton jrb = new JRadioButton(level+"-"+subLevel);
+        		jrb.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						
+						String name = ((JRadioButton)e.getSource()).getText();
+						String []levelArray = name.split("-");
+						selected_level = Integer.valueOf(levelArray[0]);
+						selected_subLevel = Integer.valueOf(levelArray[1]);
+						
+					}
+				});
+        		bg.add(jrb);
+   				if(subLevel==1)
+   				{
+   					jrb.setSelected(true);
+   				}
+   				
+   				subLevelPanel.setBorder(BorderFactory.createEtchedBorder(Color.white, Color.gray));
+        		subLevelPanel.add(jrb);
+        		
+   				Question q = mainGUI.getSudokuBankMap().get(level+"-"+subLevel);
+    			if(q!=null )
+    			{
+    				if(q.getCostSeconds()!=0)
+    				{
+    					subLevelPanel.add(new JLabel("time: "+MathUtility.getTimeString(q.getCostSeconds())));
+    				}
+    				if(!q.isSolved())
+    				{
+    					subLevelPanel.setBackground(Color.yellow);
+    					jrb.setBackground(subLevelPanel.getBackground());
+    				}
+    			}
+        		
+    			levelPanel.add(subLevelPanel);
+        		
         	}
         	tabPane.addTab("Level"+level, levelPanel);
         	
@@ -133,7 +131,9 @@ public class SudokuBankDialog extends JDialog {
     }
 
     private void doOk()
-    {
+    {    	
+    	mainGUI.loadSudokuQuestion(selected_level, selected_subLevel);
+    	
         this.setVisible(false);
     }
     

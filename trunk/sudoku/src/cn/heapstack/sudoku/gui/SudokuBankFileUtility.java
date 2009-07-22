@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class SudokuBankFileUtility {
     private static SudokuBankFileUtility instance;
-    private static final String SavingFileName = "save.dat";
+    private static final String SavingFileName = ".save.dat";
     private static final String SudokuBankFileName = "SudokuBank.dat";
     private String savingFilePath;
     
@@ -36,12 +36,17 @@ public class SudokuBankFileUtility {
         return instance;
     }
     
+    public void initSudokuBank(HashMap<String, Question> sudokuBankMap)
+    {
+    	initSudokuBank1(sudokuBankMap);
+    	initSudokuBank2(sudokuBankMap);
+    }
     /**
      * the step 1 of initialize, fill the sudokuBankMap using the SudokuBank.dat file
      * 
      * @param sudokuBankMap
      */
-    public void initSudokuBank(HashMap<String, Question> sudokuBankMap)
+    private void initSudokuBank1(HashMap<String, Question> sudokuBankMap)
     {
 		try {
 			URI uri = this.getClass().getResource(SudokuBankFileName).toURI();
@@ -70,7 +75,7 @@ public class SudokuBankFileUtility {
      * 
      * @param sudokuBankMap
      */
-    public void initSudokuBank2(HashMap<String, Question> sudokuBankMap)
+    private void initSudokuBank2(HashMap<String, Question> sudokuBankMap)
     {
     	try {
 			BufferedReader br = new BufferedReader(new FileReader(new File(savingFilePath+SavingFileName)));
@@ -86,13 +91,14 @@ public class SudokuBankFileUtility {
 			}
 			br.close();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			saveSudokuRecord(sudokuBankMap);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
     }
     
-    public void saveSudokuRecord(HashMap<String, Question> sudokuBankMap)
+
+	public void saveSudokuRecord(HashMap<String, Question> sudokuBankMap)
     {
     	try {
     		File dest = new File(savingFilePath+SavingFileName);
@@ -118,6 +124,76 @@ public class SudokuBankFileUtility {
 			pw.flush();
 			pw.close();			
 			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    
+    public void loadSudokuRecord(HashMap<String, Question> sudokuBankMap)
+    {
+    	try {
+    		File dest = new File(savingFilePath+SavingFileName);
+        	dest.delete();
+			dest.createNewFile();
+			
+			PrintWriter pw = new PrintWriter(dest);
+			for(int level=1;level<10;level++)
+	        {
+	        	for(int subLevel=1;subLevel<82;subLevel++)
+	        	{
+	        		String key = level+"-"+subLevel;
+	        		Question q = sudokuBankMap.get(key);
+	        		
+	        		pw.print(key);
+	        		pw.print(":");
+	        		pw.print(q.isSolved());
+	        		pw.print(":");
+	        		pw.print(q.getCostSeconds());
+	        		pw.println();
+	        	}
+	        }
+			pw.flush();
+			pw.close();			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public static void main(String [] args)
+    {
+	
+		
+		try {
+			URI uri = SudokuBankFileUtility.class.getResource(SudokuBankFileName).toURI();
+			File dest = new File(uri);
+			dest.delete();
+			dest.createNewFile();
+			System.out.println( dest.exists() );
+			System.out.println(dest);
+			PrintWriter pw = new PrintWriter(dest);
+			
+			for(int level=1;level<10;level++)
+	        {
+	        	for(int subLevel=1;subLevel<82;subLevel++)
+	        	{
+	        		String key = level+"-"+subLevel;
+	        		
+	        		
+	        		pw.print(key);
+	        		pw.print(":");
+	        		pw.print("004700009009400061300009800040007200000000000050006900700005400006100097008270000");
+	        		pw.println();
+	        	}
+	        }
+			pw.flush();
+			pw.close();	
+			
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

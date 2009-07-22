@@ -33,13 +33,13 @@ public class SudokuCalculator extends Observable {
 	 */
 	public boolean answer() {
 		boolean hasAnswer = true;
-		boolean isSudokuMatrix = SudokuUtility.verifyMatrix(matrix);
+		boolean isSudokuMatrix = SudokuMatrixUtility.verifyMatrix(matrix);
 		if (!isSudokuMatrix) {
 			return false;
 		}
 
 		Cell firstEditableCell = findFirstEditableCell();
-		firstEditableCell.availableValueArray.addAll(SudokuUtility
+		firstEditableCell.availableValueArray.addAll(SudokuMatrixUtility
 				.getValidCellValue(firstEditableCell, matrix));
 
 		stack.add(firstEditableCell);
@@ -59,7 +59,7 @@ public class SudokuCalculator extends Observable {
 					}
 					next.setValue(0);
 					next.availableValueArray.clear();
-					next.availableValueArray.addAll(SudokuUtility
+					next.availableValueArray.addAll(SudokuMatrixUtility
 							.getValidCellValue(next, matrix));
 
 					stack.add(next);
@@ -67,7 +67,7 @@ public class SudokuCalculator extends Observable {
 					current = stack.pop();
 					current.setValue(0);
 					current.availableValueArray.clear();
-					current.availableValueArray.addAll(SudokuUtility
+					current.availableValueArray.addAll(SudokuMatrixUtility
 							.getValidCellValue(current, matrix));
 
 					// System.out.println("Pop:"+current);
@@ -81,7 +81,7 @@ public class SudokuCalculator extends Observable {
 		}
 
 		// SudokuUtility.printMatrix(matrix);
-		hasAnswer = SudokuUtility.verifyIfSudokuFinished(matrix);
+		hasAnswer = SudokuMatrixUtility.verifyIfSudokuFinished(matrix);
 
 		this.setChanged();
 		this.notifyObservers();

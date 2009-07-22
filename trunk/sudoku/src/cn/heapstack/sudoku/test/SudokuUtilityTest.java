@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import cn.heapstack.sudoku.SudokuUtility;
+import cn.heapstack.sudoku.SudokuMatrixUtility;
 
 
 public class SudokuUtilityTest {
@@ -15,7 +15,7 @@ public class SudokuUtilityTest {
 	public void testBuildMatrix() {
 
 		String input = "004700009009400061300009800040007200000000000050006900700005400006100097008270000";
-		int[][] result_matrix = SudokuUtility.buildMatrix(input);
+		int[][] result_matrix = SudokuMatrixUtility.buildMatrix(input);
 		assertEquals(9, result_matrix.length);
 		assertEquals(81, result_matrix.length
 				* result_matrix[result_matrix.length - 1].length);
@@ -30,16 +30,16 @@ public class SudokuUtilityTest {
 
 		// Negative case
 		String input_negative = "004700009";
-		assertTrue(SudokuUtility.buildMatrix(input_negative).length==0);
+		assertTrue(SudokuMatrixUtility.buildMatrix(input_negative).length==0);
 
 		input_negative = "";
-		assertTrue(SudokuUtility.buildMatrix(input_negative).length==0);
+		assertTrue(SudokuMatrixUtility.buildMatrix(input_negative).length==0);
 
 		input_negative = null;
-		assertTrue(SudokuUtility.buildMatrix(input_negative).length==0);
+		assertTrue(SudokuMatrixUtility.buildMatrix(input_negative).length==0);
 
 		input_negative = "004770009009400061300009800040007200000000000050006900700005400006100097008270000";
-		assertTrue(SudokuUtility.buildMatrix(input_negative).length==0);
+		assertTrue(SudokuMatrixUtility.buildMatrix(input_negative).length==0);
 
 	}
 
@@ -55,12 +55,12 @@ public class SudokuUtilityTest {
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 }, 
 				{ 0, 0, 8, 2, 7, 0, 0, 0, 0 } };
-		String result = SudokuUtility.exportMatrix2String(init_matrix);
+		String result = SudokuMatrixUtility.exportMatrix2String(init_matrix);
 
 		assertEquals(
 						"004700009009400061300009800040007200000000000050006900700005400006100097008270000",
 						result);
-		int[][] result_matrix = SudokuUtility.buildMatrix(result);
+		int[][] result_matrix = SudokuMatrixUtility.buildMatrix(result);
 
 		assertEquals(init_matrix.length, result_matrix.length);
 		assertEquals(init_matrix[init_matrix.length - 1].length,	result_matrix[result_matrix.length - 1].length);
@@ -87,7 +87,7 @@ public class SudokuUtilityTest {
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 }, 
 				{ 0, 0, 8, 2, 7, 0, 0, 0, 0 } };
-		assertTrue(SudokuUtility.verifyMatrix(init_matrix));
+		assertTrue(SudokuMatrixUtility.verifyMatrix(init_matrix));
 
 		// Negative case
 		init_matrix = new int[][] { 
@@ -100,7 +100,7 @@ public class SudokuUtilityTest {
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 },
 				{ 0, 0, 8, 2, 7, 0, 0, 0, 0 } };
-		assertFalse(SudokuUtility.verifyMatrix(init_matrix));
+		assertFalse(SudokuMatrixUtility.verifyMatrix(init_matrix));
 
 		init_matrix = new int[][] { 
 				{ 0, 0, 4, 7, 0, 0, 0, 0, 9 },
@@ -111,7 +111,7 @@ public class SudokuUtilityTest {
 				{ 0, 5, 0, 0, 0, 6, 9, 0, 0 },
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 } };
-		assertFalse(SudokuUtility.verifyMatrix(init_matrix));
+		assertFalse(SudokuMatrixUtility.verifyMatrix(init_matrix));
 
 		init_matrix = new int[][] { 
 				{ 0, 0, 4, 7, 0, 0, 0, 0, 7 },
@@ -123,7 +123,7 @@ public class SudokuUtilityTest {
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 }, 
 				{ 0, 0, 8, 2, 7, 0, 0, 0, 0 } };
-		assertFalse(SudokuUtility.verifyMatrix(init_matrix));
+		assertFalse(SudokuMatrixUtility.verifyMatrix(init_matrix));
 
 		init_matrix = new int[][] { 
 				{ 0, 0, 4, 7, 0, 0, 0, 0, 9 },
@@ -135,7 +135,7 @@ public class SudokuUtilityTest {
 				{ 7, 0, 0, 0, 0, 5, 4, 0, 0 },
 				{ 0, 0, 6, 1, 0, 0, 0, 9, 7 }, 
 				{ 0, 0, 8, 2, 7, 0, 0, 0, 0 } };
-		assertFalse(SudokuUtility.verifyMatrix(init_matrix));
+		assertFalse(SudokuMatrixUtility.verifyMatrix(init_matrix));
 	}
 
 }
