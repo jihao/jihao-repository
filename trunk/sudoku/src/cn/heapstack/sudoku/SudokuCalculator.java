@@ -76,7 +76,7 @@ public class SudokuCalculator extends Observable {
 			Cell top = stack.peek();
 			top.setValue(top.availableValueArray.remove(0));
 		} catch (java.util.EmptyStackException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			hasAnswer = false;
 		}
 

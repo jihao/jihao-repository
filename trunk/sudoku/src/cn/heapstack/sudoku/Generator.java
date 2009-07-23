@@ -149,56 +149,77 @@ public class Generator {
 	
 	public static int[][] generateSudokuMatirx2(int difficultLevel)
 	{
-		clear();
-		
-		Random r = new Random();
-		for(int i = 1; i<10; i++)
+		boolean hasAnswer = false;
+		while(!hasAnswer)
 		{
-			int x = r.nextInt(9);
-			int y = r.nextInt(9);
-			matrix[x][y] = i;
-		}
-		
-		// TODO:
-		for(int i=0;i<4;i++)
-		{
+			clear();
 			
-		}
-		
-		System.out.println(">>>>>>>>>>>>>");
-		SudokuMatrixUtility.printMatrix(matrix);
-		
-		SudokuCalculator sc = new SudokuCalculator(matrix);
-		sc.answer();
-		Cell[][] result = sc.getSolvedSudoku();
-		
-		for(int i=0;i<9;i++)
-		{
-			for(int j=0;j<9;j++)
+			Random r = new Random();
+			for(int i = 1; i<10; i++)
 			{
-				matrix[i][j] = result[i][j].getValue();
+				int x = r.nextInt(9);
+				int y = r.nextInt(9);
+				matrix[x][y] = i;
 			}
-		}
-		
-		if(difficultLevel<1 || difficultLevel>10)
-		{
-			difficultLevel = 1;
-		}
-		
-		int hideCount =  20+difficultLevel*6;
-		
-		for(int i=0;i<hideCount;i++)
-		{
-			int next = r.nextInt(81);
-			int x = next/9;
-			int y = next%9;
 			
-			matrix[x][y] = 0;
+			//fill more init values for generate the sudoku matrix
+			for(int i=0;i<21;i++)
+			{
+				boolean filledOne = true;
+				while (filledOne) {
+					int x = r.nextInt(9);
+					int y = r.nextInt(9);
+					if(matrix[x][y]==0)
+					{
+						ArrayList<Integer> validValues = SudokuMatrixUtility.getValidCellValue(x, y, matrix);
+						if(validValues.size()>0)
+						{
+							int random = r.nextInt(validValues.size());
+							matrix[x][y] = validValues.get(random).intValue();
+							//System.out.println(matrix[x][y]);
+							filledOne = false;
+						}
+					}
+				}
+			}
+			
+			//System.out.println(">>>>>>>>>>>>>");
+			//SudokuMatrixUtility.printMatrix(matrix);
+			
+			SudokuCalculator sc = new SudokuCalculator(matrix);
+			hasAnswer = sc.answer();
+			//System.out.println("<<<<<<<<<<<<<"+hasAnswer);
+			Cell[][] result = sc.getSolvedSudoku();
+			
+			for(int i=0;i<9;i++)
+			{
+				for(int j=0;j<9;j++)
+				{
+					matrix[i][j] = result[i][j].getValue();
+				}
+			}
+			
+			if(difficultLevel<1 || difficultLevel>10)
+			{
+				difficultLevel = 1;
+			}
+			
+			int hideCount =  20+difficultLevel*6;
+			
+			for(int i=0;i<hideCount;i++)
+			{
+				int next = r.nextInt(81);
+				int x = next/9;
+				int y = next%9;
+				
+				matrix[x][y] = 0;
+			}
+			
+			//System.out.println("[Generator][DEBUG] - difficult level: "+difficultLevel+", hide: "+hideCount+" cells");
+			//System.out.println("[Generator][DEBUG] - Sudoku matrix:");
+			//SudokuMatrixUtility.printMatrix(matrix);
 		}
 		
-		System.out.println("[Generator][DEBUG] - difficult level: "+difficultLevel+", hide: "+hideCount+" cells");
-		System.out.println("[Generator][DEBUG] - Sudoku matrix:");
-		SudokuMatrixUtility.printMatrix(matrix);
 		
 		return  matrix;
 	}

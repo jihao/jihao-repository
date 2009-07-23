@@ -193,7 +193,7 @@ public class SudokuBankFileUtility {
 			System.out.println(dest);
 			PrintWriter pw = new PrintWriter(dest);
 			
-			for(int level=1;level<10;level++)
+			for(int level=1;level<2;level++)
 	        {
 	        	for(int subLevel=1;subLevel<82;subLevel++)
 	        	{
@@ -205,6 +205,7 @@ public class SudokuBankFileUtility {
 	        		int[][] matrix = Generator.generateSudokuMatirx2(level);
 	        		String initProblem = SudokuMatrixUtility.exportMatrix2String(matrix);
 	        		pw.print(initProblem);
+	        		System.out.println(initProblem);
 	        		pw.println();
 	        	}
 	        }
