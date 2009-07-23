@@ -184,7 +184,52 @@ public class SudokuMatrixUtility {
 		 return set;
 	}
 	
-	
+	public static ArrayList<Integer> getValidCellValue(int x,int y, int[][] sudoku)
+	{
+		
+		//System.out.println("row: "+row+" column:"+column);
+		ArrayList<Integer> set = new ArrayList<Integer>();
+		for(int i=1;i<10;i++)
+		{
+			set.add(i);
+		}
+		
+		ArrayList<Integer> existed = new ArrayList<Integer>();		
+		for(int i=0;i<9;i++)
+		{
+			//System.out.print(" & "+sudoku[row][i].getValue());
+			if (sudoku[x][i] != 0)
+				existed.add(sudoku[x][i]);
+		}
+		//System.out.println();
+		for(int i=0;i<9;i++)
+		{
+			//System.out.print(" % "+sudoku[i][column].getValue());
+			if(sudoku[i][y] != 0)
+				existed.add(sudoku[i][y]);
+		}
+		
+		//System.out.println();
+		
+		int block_row = x/3;
+		int block_colum = y/3;
+		for(int i=block_row*3;i<(block_row+1)*3;i++)
+		{
+			for(int j=block_colum*3;j<(block_colum+1)*3;j++)
+			{
+				//System.out.print(" $ "+sudoku[i][j].getValue());
+				if(sudoku[i][j]!=0)
+					existed.add(sudoku[i][j]);
+			}
+		}
+		//System.out.println();
+		//System.out.println(set);
+		//System.out.println(existed);
+		
+		 set.removeAll(existed);
+		 //System.out.println("OK values:"+set);
+		 return set;
+	}
 	/**
 	 * <p>
 	 * ����Ȼ˳���ʾ�ľ����ַ�������

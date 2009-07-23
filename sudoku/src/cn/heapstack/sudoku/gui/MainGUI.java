@@ -50,8 +50,6 @@ public class MainGUI extends JFrame implements Observer{
 	private static final long serialVersionUID = 3442781640025318902L;
 
 	private static final String VERSION = "v2.0";
-	public static MainGUI frame = new MainGUI("Sudoku "+ VERSION);
-	
 	
 	private int bigPanelRow = 0;
 	private int bigPanelColumn = 0;
@@ -80,7 +78,7 @@ public class MainGUI extends JFrame implements Observer{
 	private JTextField textFiledDifficulty = new JTextField("5",3);
 	private JCheckBox cb = new JCheckBox("Enable error hits");
 	private JCheckBox cbDrawLineHelp = new JCheckBox("Enable help system");
-	
+	private JLabel levelLabel = new JLabel("1-1");
 	/**
 	 * Used for draw help line when cell value changed
 	 */
@@ -91,23 +89,24 @@ public class MainGUI extends JFrame implements Observer{
 	//
 	//**************************************************
 	private HashMap<String , Question> sudokuBankMap = new HashMap<String, Question>();
-	
 	public HashMap<String, Question> getSudokuBankMap() {
 		return sudokuBankMap;
 	}
+	
+	private MainGUI currentMainGUInstance;
+	
 
 
 	public MainGUI(String string) {
 		super(string);
 		init();
-	}
-
-	private void init() {
 		
+		this.currentMainGUInstance = this;
+	}
+	
+	private void init() {
 		SudokuBankFileUtility instance = SudokuBankFileUtility.getInstance();
 		instance.initSudokuBank(sudokuBankMap);
-		
-		
 	}
 
 	/**
@@ -118,14 +117,29 @@ public class MainGUI extends JFrame implements Observer{
 	 */
 	public static void main(String[] args) {
 		
-		LookAndFeelManager.setCrossPlatformLookAndFeel();
+		LookAndFeelManager.setSystemLookAndFeel();
 		//LookAndFeelManager.setMotifLookAndFeel();
 		//LookAndFeelManager.setNapkinLookAndFeel();
 		
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run() {
-				frame.sudoku = frame.generateSudokuCellMatrix();
+				MainGUI frame = new MainGUI("Sudoku "+ VERSION);
+				//
+				Question q = SudokuBankFileUtility.getInstance().findFirstUnSolvedQuestion(frame.sudokuBankMap);
+				int[][] matrix;
+				if (q==null)
+				{
+					matrix = Generator.generateSudokuMatirx(10);
+					
+				}
+				else
+				{
+					matrix = SudokuMatrixUtility.buildMatrix(q.getInitProblem());;
+					frame.levelLabel.setText(q.getLevel()+"-"+q.getSubLevel());
+				}
+				frame.sudoku = frame.generateSudokuCellMatrix(matrix);
+				
 				frame.bigPanels = new JPanel[9];
 				frame.cellPanelMatrix = new CellPanel[9][9];
 				
@@ -138,9 +152,9 @@ public class MainGUI extends JFrame implements Observer{
 				frame.setJMenuBar(menuBar);
 		       
 				JPanel sudokuPanel = frame.buildSodokuPanel();
-				
 				sudokuPanel.setPreferredSize(new Dimension(600,600));
-				ConfigPanel configPanel = frame.new ConfigPanel();
+				
+				ConfigPanel configPanel = frame.buildConfigPanel();
 				configPanel.setPreferredSize(new Dimension(180,600));
 				
 				JPanel contentPanel = new JPanel();
@@ -155,6 +169,7 @@ public class MainGUI extends JFrame implements Observer{
 		});
 		
 	}
+	
 	private class ChangeLookAndFeelAction extends AbstractAction {
 		private static final long serialVersionUID = 74351688296592622L;
 		private MainGUI gui;
@@ -180,15 +195,22 @@ public class MainGUI extends JFrame implements Observer{
 	}
 	
 	private class FileAction implements ActionListener {
+		private MainGUI mainGUI;
+		
+		public FileAction(MainGUI mainGUI)
+		{
+			this.mainGUI = mainGUI;
+		}
 		
 		public void actionPerformed(ActionEvent e) {
+			
 			showSudokuBankDialog();
 		}
 
 		private void showSudokuBankDialog() {
-			SudokuBankDialog sudokuBank = new SudokuBankDialog(frame);
+			SudokuBankDialog sudokuBank = new SudokuBankDialog(mainGUI);
 			
-            sudokuBank.setBounds(frame.getLocation().x, frame.getLocation().y, 780, 600);
+            sudokuBank.setBounds(mainGUI.getLocation().x, mainGUI.getLocation().y, 780, 600);
             sudokuBank.setVisible(true);
             sudokuBank.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 			
@@ -247,15 +269,19 @@ public class MainGUI extends JFrame implements Observer{
 	    return mi;
 	}*/
 	
+    private ConfigPanel buildConfigPanel() {
+		return new ConfigPanel(this);
+	}
+    
 	private JMenuBar buildMenuBar()
 	{
 		JMenuBar menuBar = new JMenuBar();
 		JMenuItem mi = null ;
 		
 		JMenu filemenu = new JMenu("File");
-		mi = new JMenuItem("Open Sudoku Bank");
+		mi = new JMenuItem("Open Question Bank");
 		filemenu.add(mi);
-		mi.addActionListener(new FileAction());
+		mi.addActionListener(new FileAction(this));
 		
 		JMenu lafmenu = new JMenu("Look & Feel");
 		
@@ -363,9 +389,8 @@ public class MainGUI extends JFrame implements Observer{
 		}
 	}
 	
-	private Cell[][] generateSudokuCellMatrix()
+	private Cell[][] generateSudokuCellMatrix(int[][] matrix)
 	{
-		int[][] matrix = Generator.generateSudokuMatirx(10);
 		Cell[][] cellMatrix = new Cell[9][9];
 		
 		for(int i=0;i<9;i++)
@@ -398,21 +423,27 @@ public class MainGUI extends JFrame implements Observer{
 		else
 		{
 			t.stop();
-			SwingUtilities.invokeLater(new Runnable() {
-				
-				@Override
+			SwingUtilities.invokeLater(new Runnable()
+			{
 				public void run() {
-					
-					int result = JOptionPane.showConfirmDialog(frame, "Congratulation, you succeed !!!", "Congratulation", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
-					 if( result == JOptionPane.OK_OPTION )
-					 {
-						System.out.println("[OK], cost:" + MathUtility.getTimeString(timeCounter));
+					if(timeCounter!=0)
+					{
+						int result = JOptionPane.showConfirmDialog(currentMainGUInstance, "Congratulation, you succeed !!!", "Congratulation", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
+						if( result == JOptionPane.OK_OPTION )
+						{
+							System.out.println("[OK], cost:" + MathUtility.getTimeString(timeCounter));	
+						}
 						
-					 }
-					
-				}
+						Question q = sudokuBankMap.get(levelLabel.getText());
+						if(q.getCostSeconds()>timeCounter)
+						{
+							q.setCostSeconds(timeCounter);
+						}
+						q.setSolved(true);
+						SudokuBankFileUtility.getInstance().saveSudokuRecord(sudokuBankMap);
+					}
+			}
 			});
-			 
 		}
 	}
 
@@ -572,8 +603,9 @@ public class MainGUI extends JFrame implements Observer{
 	{
 		timeCounter = 0;
 		t.start();
-		
-		Question q = sudokuBankMap.get(level+"-"+subLevel);
+		String levelString = level+"-"+subLevel;
+		levelLabel.setText(levelString);
+		Question q = sudokuBankMap.get(levelString);
 		int[][] matrix = SudokuMatrixUtility.buildMatrix(q.getInitProblem());
 		loadMatrix(matrix);
 	}
@@ -647,6 +679,7 @@ public class MainGUI extends JFrame implements Observer{
 
 		private static final long serialVersionUID = 4100509515122280282L;
 		
+		private JPanel infoPanel = new JPanel();
 		private JPanel timeCountingPanel = new JPanel();
 		private JPanel assistantPanel = new JPanel();
 		private JPanel miscPanel = new JPanel();
@@ -658,32 +691,30 @@ public class MainGUI extends JFrame implements Observer{
 		
 		private JToggleButton [] buttons = new JToggleButton[9];
 		
-		public ConfigPanel()
+		private MainGUI mainGUI;
+
+		public ConfigPanel(MainGUI mainGUI)
 		{
+			this.mainGUI = mainGUI;
 			this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-			buildTimeCountingPanel();
+			buildInfoPanel();
 			buildAssistantPanel();
 			buildMiscPanel();
 			setSubPanelsSize();
 		}
 		
-		private void buildTimeCountingPanel() {
-			timeCountingPanel.setBorder(ImageBorder.generateDefaultImageBorder());
-			timeCountingPanel.setLayout(new GridBagLayout());
+		private void buildInfoPanel()
+		{
+			JButton btnBank = new JButton("Question Bank");
+			btnBank.addActionListener(new FileAction(mainGUI));
+						
 			final JLabel labelTime = new JLabel();
-			labelTime.setPreferredSize(new Dimension(100,100));
 			labelTime.setForeground(Color.BLUE);
-			labelTime.setBorder(BorderFactory.createTitledBorder("Elapsed time"));
-			labelTime.setAlignmentX(CENTER_ALIGNMENT);
-			labelTime.setAlignmentY(CENTER_ALIGNMENT);
 			t = new Timer(1000,new ActionListener(){
-				
 				public void actionPerformed(ActionEvent e) {
-		
 					timeCounter++;
 					String cost = MathUtility.getTimeString(timeCounter);
-					
-					labelTime.setText("      ".concat(cost));//Just for better UI
+					labelTime.setText(cost);//Just for better UI
 				}
 
 				});
@@ -691,8 +722,28 @@ public class MainGUI extends JFrame implements Observer{
 			t.setRepeats(true);
 			t.start();
 			
-			timeCountingPanel.add(labelTime);
-			this.add(timeCountingPanel);
+			infoPanel.setBorder(ImageBorder.generateDefaultImageBorder());
+			infoPanel.setLayout(new GridBagLayout());
+			GridBagConstraints c = new GridBagConstraints();
+			c.insets = new Insets(2,2,2,2);
+			c.gridx = 0;
+			c.gridy = 0;
+			infoPanel.add(new JLabel("Level: "),c);
+			c.gridx = 1;
+			c.gridy = 0;
+			infoPanel.add(levelLabel,c);
+			c.gridx = 0;
+			c.gridy = 1;
+			c.gridwidth = 2;
+			infoPanel.add(labelTime,c);
+			c.gridx = 0;
+			c.gridy = 2;
+			c.gridwidth = 2;
+			infoPanel.add(btnBank,c);
+			
+
+			
+			this.add(infoPanel);
 		}
 
 		private void setSubPanelsSize() {
@@ -831,6 +882,10 @@ public class MainGUI extends JFrame implements Observer{
 			}
 			else if(command.compareTo("cmd_Solve")==0)
 			{
+				t.stop();
+				timeCounter = 0;
+				
+				boolean status= cb.isSelected();
 				cb.setSelected(false);
 				clearUserFilledValue();
 				boolean isFinished = verifyIfSudokuFinished();
@@ -850,11 +905,13 @@ public class MainGUI extends JFrame implements Observer{
 					ex.answer();
 					
 				}
-				cb.setSelected(true);
+				cb.setSelected(status);
 				
 			}else if(command.compareTo("cmd_Reset")==0)
 			{
 				clearUserFilledValue();
+				timeCounter = 0;
+				t.start();
 			}
 			
 			// END else if
@@ -884,19 +941,13 @@ public class MainGUI extends JFrame implements Observer{
 				else
 				{
 					t.stop();
-					SwingUtilities.invokeLater(new Runnable() {
-						
-						@Override
-						public void run() {
-							
-							int result = JOptionPane.showConfirmDialog(frame, "Sorry, no answer !!!", "Failed", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
+
+							int result = JOptionPane.showConfirmDialog(this, "Sorry, no answer !!!", "Failed", JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE );
 							 if( result == JOptionPane.OK_OPTION )
 							 {
 								System.out.println("[OK], cost:" + MathUtility.getTimeString(timeCounter));
 								
 							 }
-						}
-					});
 				}
 				
 				
@@ -905,6 +956,7 @@ public class MainGUI extends JFrame implements Observer{
 			
 		}
 	} // END ConfigPanel
+
 
 	
 }
