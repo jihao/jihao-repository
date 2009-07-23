@@ -10,6 +10,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+import cn.heapstack.sudoku.Generator;
+import cn.heapstack.sudoku.SudokuMatrixUtility;
+
 
 public class SudokuBankFileUtility {
     private static SudokuBankFileUtility instance;
@@ -96,7 +99,23 @@ public class SudokuBankFileUtility {
 			e.printStackTrace();
 		}
     }
-    
+
+    public Question findFirstUnSolvedQuestion(HashMap<String, Question> sudokuBankMap)
+    {
+		for(int level=1;level<10;level++)
+        {
+        	for(int subLevel=1;subLevel<82;subLevel++)
+        	{
+        		String key = level+"-"+subLevel;
+        		Question q = sudokuBankMap.get(key);
+        		if(!q.isSolved())
+        		{
+        			return q;
+        		}
+        	}
+        }
+		return null;
+    }
 
 	public void saveSudokuRecord(HashMap<String, Question> sudokuBankMap)
     {
@@ -179,11 +198,13 @@ public class SudokuBankFileUtility {
 	        	for(int subLevel=1;subLevel<82;subLevel++)
 	        	{
 	        		String key = level+"-"+subLevel;
-	        		
+	        		System.out.println(key);
 	        		
 	        		pw.print(key);
 	        		pw.print(":");
-	        		pw.print("004700009009400061300009800040007200000000000050006900700005400006100097008270000");
+	        		int[][] matrix = Generator.generateSudokuMatirx2(level);
+	        		String initProblem = SudokuMatrixUtility.exportMatrix2String(matrix);
+	        		pw.print(initProblem);
 	        		pw.println();
 	        	}
 	        }

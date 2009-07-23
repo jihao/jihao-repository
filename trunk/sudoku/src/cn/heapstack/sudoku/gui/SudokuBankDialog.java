@@ -89,9 +89,9 @@ public class SudokuBankDialog extends JDialog {
     				{
     					subLevelPanel.add(new JLabel("time: "+MathUtility.getTimeString(q.getCostSeconds())));
     				}
-    				if(!q.isSolved())
+    				if(q.isSolved())
     				{
-    					subLevelPanel.setBackground(Color.yellow);
+    					subLevelPanel.setBackground(Color.green);
     					jrb.setBackground(subLevelPanel.getBackground());
     				}
     			}

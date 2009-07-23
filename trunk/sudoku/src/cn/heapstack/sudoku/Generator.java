@@ -19,7 +19,16 @@ public class Generator {
 //		{"b4","b5","b6"},
 //		{"b7","b8","b9"}};
 	
-	
+	private static void clear()
+	{
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				matrix[i][j] = 0;
+			}
+		}
+	}
 	private static int[] generateInitArray()
 	{
 		ArrayList<Integer> array = new ArrayList<Integer>();
@@ -108,9 +117,9 @@ public class Generator {
 	 * hide 26 - 56 
 	 * @return
 	 */
-	public static int[][] generateSudokuMatirx(int difficultLevelParam)
+	public static int[][] generateSudokuMatirx(int difficultLevel)
 	{
-		int difficultLevel = difficultLevelParam;
+		clear();
 		generateInitArray();
 		generateCompleteSudoku();
 		
@@ -138,6 +147,62 @@ public class Generator {
 		return matrix;
 	}
 	
+	public static int[][] generateSudokuMatirx2(int difficultLevel)
+	{
+		clear();
+		
+		Random r = new Random();
+		for(int i = 1; i<10; i++)
+		{
+			int x = r.nextInt(9);
+			int y = r.nextInt(9);
+			matrix[x][y] = i;
+		}
+		
+		// TODO:
+		for(int i=0;i<4;i++)
+		{
+			
+		}
+		
+		System.out.println(">>>>>>>>>>>>>");
+		SudokuMatrixUtility.printMatrix(matrix);
+		
+		SudokuCalculator sc = new SudokuCalculator(matrix);
+		sc.answer();
+		Cell[][] result = sc.getSolvedSudoku();
+		
+		for(int i=0;i<9;i++)
+		{
+			for(int j=0;j<9;j++)
+			{
+				matrix[i][j] = result[i][j].getValue();
+			}
+		}
+		
+		if(difficultLevel<1 || difficultLevel>10)
+		{
+			difficultLevel = 1;
+		}
+		
+		int hideCount =  20+difficultLevel*6;
+		
+		for(int i=0;i<hideCount;i++)
+		{
+			int next = r.nextInt(81);
+			int x = next/9;
+			int y = next%9;
+			
+			matrix[x][y] = 0;
+		}
+		
+		System.out.println("[Generator][DEBUG] - difficult level: "+difficultLevel+", hide: "+hideCount+" cells");
+		System.out.println("[Generator][DEBUG] - Sudoku matrix:");
+		SudokuMatrixUtility.printMatrix(matrix);
+		
+		return  matrix;
+	}
+	
 	
 	/**
 	 * Demo use Generator to generate a sudoku, then use Executer to solve it
@@ -145,7 +210,7 @@ public class Generator {
 	 */
 	public static void main(String[] agrs)
 	{
-		int[][] init_problem = Generator.generateSudokuMatirx(10);
+		int[][] init_problem = Generator.generateSudokuMatirx2(10);
 		SudokuCalculator ex = new SudokuCalculator(init_problem);
 		ex.answer();
 		SudokuMatrixUtility.printMatrix(ex.getSolvedSudoku());
