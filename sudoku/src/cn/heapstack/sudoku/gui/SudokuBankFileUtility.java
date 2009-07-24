@@ -182,8 +182,6 @@ public class SudokuBankFileUtility {
     
     public static void main(String [] args)
     {
-	
-		
 		try {
 			URI uri = SudokuBankFileUtility.class.getResource(SudokuBankFileName).toURI();
 			File dest = new File(uri);
@@ -193,12 +191,13 @@ public class SudokuBankFileUtility {
 			System.out.println(dest);
 			PrintWriter pw = new PrintWriter(dest);
 			
-			for(int level=1;level<2;level++)
+			for(int level=1;level<10;level++)
 	        {
 	        	for(int subLevel=1;subLevel<82;subLevel++)
 	        	{
 	        		String key = level+"-"+subLevel;
-	        		System.out.println(key);
+	        		System.out.print(key);
+	        		System.out.print(":");
 	        		
 	        		pw.print(key);
 	        		pw.print(":");

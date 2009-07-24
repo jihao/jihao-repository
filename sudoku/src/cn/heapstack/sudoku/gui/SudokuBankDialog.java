@@ -60,6 +60,7 @@ public class SudokuBankDialog extends JDialog {
         	for(int subLevel=1;subLevel<82;subLevel++)
         	{
         		JPanel subLevelPanel = new JPanel();
+        		
         		JRadioButton jrb = new JRadioButton(level+"-"+subLevel);
         		jrb.addActionListener(new ActionListener() {
 					

@@ -94,19 +94,68 @@ public class MainGUI extends JFrame implements Observer{
 	}
 	
 	private MainGUI currentMainGUInstance;
-	
+	private SudokuBankDialog sudokuBank;
 
 
 	public MainGUI(String string) {
 		super(string);
-		init();
-		
 		this.currentMainGUInstance = this;
+		
+		init_initSudokuBankMap();
+		showMainGUI();
+		init_sudokuBankDialog();
 	}
 	
-	private void init() {
+	private void showMainGUI() {
+		Question q = SudokuBankFileUtility.getInstance().findFirstUnSolvedQuestion(this.sudokuBankMap);
+		int[][] matrix;
+		if (q==null)
+		{
+			matrix = Generator.generateSudokuMatirx(10);
+			
+		}
+		else
+		{
+			matrix = SudokuMatrixUtility.buildMatrix(q.getInitProblem());;
+			this.levelLabel.setText(q.getLevel()+"-"+q.getSubLevel());
+		}
+		this.sudoku = this.generateSudokuCellMatrix(matrix);
+		
+		this.bigPanels = new JPanel[9];
+		this.cellPanelMatrix = new CellPanel[9][9];
+		
+		//frame.setUndecorated(true);
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setLocation(5, 5);
+		this.setPreferredSize(new Dimension(780,600));
+		
+		JMenuBar menuBar = this.buildMenuBar();
+		this.setJMenuBar(menuBar);
+       
+		JPanel sudokuPanel = this.buildSodokuPanel();
+		sudokuPanel.setPreferredSize(new Dimension(600,600));
+		
+		ConfigPanel configPanel = this.buildConfigPanel();
+		configPanel.setPreferredSize(new Dimension(180,600));
+		
+		JPanel contentPanel = new JPanel();
+		contentPanel.setLayout(new BoxLayout(contentPanel,BoxLayout.X_AXIS));
+		contentPanel.add(sudokuPanel);
+		contentPanel.add(configPanel);
+		
+		this.getContentPane().add(contentPanel);
+		this.pack();		
+	}
+
+	private void init_sudokuBankDialog() {
+		sudokuBank = new SudokuBankDialog(currentMainGUInstance);
+        sudokuBank.setBounds(this.getLocation().x, this.getLocation().y, 780, 600);
+        sudokuBank.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+	}
+
+	private void init_initSudokuBankMap() {
 		SudokuBankFileUtility instance = SudokuBankFileUtility.getInstance();
-		instance.initSudokuBank(sudokuBankMap);
+		instance.initSudokuBank(sudokuBankMap);		
 	}
 
 	/**
@@ -125,45 +174,6 @@ public class MainGUI extends JFrame implements Observer{
 		{
 			public void run() {
 				MainGUI frame = new MainGUI("Sudoku "+ VERSION);
-				//
-				Question q = SudokuBankFileUtility.getInstance().findFirstUnSolvedQuestion(frame.sudokuBankMap);
-				int[][] matrix;
-				if (q==null)
-				{
-					matrix = Generator.generateSudokuMatirx(10);
-					
-				}
-				else
-				{
-					matrix = SudokuMatrixUtility.buildMatrix(q.getInitProblem());;
-					frame.levelLabel.setText(q.getLevel()+"-"+q.getSubLevel());
-				}
-				frame.sudoku = frame.generateSudokuCellMatrix(matrix);
-				
-				frame.bigPanels = new JPanel[9];
-				frame.cellPanelMatrix = new CellPanel[9][9];
-				
-				//frame.setUndecorated(true);
-				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				frame.setLocation(5, 5);
-				frame.setPreferredSize(new Dimension(780,600));
-				
-				JMenuBar menuBar = frame.buildMenuBar();
-				frame.setJMenuBar(menuBar);
-		       
-				JPanel sudokuPanel = frame.buildSodokuPanel();
-				sudokuPanel.setPreferredSize(new Dimension(600,600));
-				
-				ConfigPanel configPanel = frame.buildConfigPanel();
-				configPanel.setPreferredSize(new Dimension(180,600));
-				
-				JPanel contentPanel = new JPanel();
-				contentPanel.setLayout(new BoxLayout(contentPanel,BoxLayout.X_AXIS));
-				contentPanel.add(sudokuPanel);
-				contentPanel.add(configPanel);
-				
-				frame.getContentPane().add(contentPanel);
-				frame.pack();
 				frame.setVisible(true);
 			}
 		});
@@ -195,27 +205,9 @@ public class MainGUI extends JFrame implements Observer{
 	}
 	
 	private class FileAction implements ActionListener {
-		private MainGUI mainGUI;
-		
-		public FileAction(MainGUI mainGUI)
-		{
-			this.mainGUI = mainGUI;
-		}
-		
 		public void actionPerformed(ActionEvent e) {
-			
-			showSudokuBankDialog();
-		}
-
-		private void showSudokuBankDialog() {
-			SudokuBankDialog sudokuBank = new SudokuBankDialog(mainGUI);
-			
-            sudokuBank.setBounds(mainGUI.getLocation().x, mainGUI.getLocation().y, 780, 600);
-            sudokuBank.setVisible(true);
-            sudokuBank.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-			
-		}
-	
+			sudokuBank.setVisible(true);
+		}	
 	}
 
     /**
@@ -281,7 +273,7 @@ public class MainGUI extends JFrame implements Observer{
 		JMenu filemenu = new JMenu("File");
 		mi = new JMenuItem("Open Question Bank");
 		filemenu.add(mi);
-		mi.addActionListener(new FileAction(this));
+		mi.addActionListener(new FileAction());
 		
 		JMenu lafmenu = new JMenu("Look & Feel");
 		
@@ -435,16 +427,24 @@ public class MainGUI extends JFrame implements Observer{
 						}
 						
 						Question q = sudokuBankMap.get(levelLabel.getText());
-						if(q.getCostSeconds()>timeCounter)
+						if(q.getCostSeconds()==0||q.getCostSeconds()>timeCounter)
 						{
 							q.setCostSeconds(timeCounter);
 						}
 						q.setSolved(true);
 						SudokuBankFileUtility.getInstance().saveSudokuRecord(sudokuBankMap);
+						
+						updateSudokuBankDialog();
 					}
 			}
+
+				
 			});
 		}
+	}
+	
+	private void updateSudokuBankDialog() {
+		init_sudokuBankDialog();
 	}
 
 	private void verifyInput(Cell source) {
@@ -706,7 +706,7 @@ public class MainGUI extends JFrame implements Observer{
 		private void buildInfoPanel()
 		{
 			JButton btnBank = new JButton("Question Bank");
-			btnBank.addActionListener(new FileAction(mainGUI));
+			btnBank.addActionListener(new FileAction());
 						
 			final JLabel labelTime = new JLabel();
 			labelTime.setForeground(Color.BLUE);
