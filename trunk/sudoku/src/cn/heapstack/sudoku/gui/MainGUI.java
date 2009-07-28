@@ -159,9 +159,7 @@ public class MainGUI extends JFrame implements Observer{
 	}
 
 	/**
-	 * @param vm arguments
-	 * -XX:ThreadStackSize=256-Xss50m
-	 * 
+	 *  
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -691,11 +689,11 @@ public class MainGUI extends JFrame implements Observer{
 		
 		private JToggleButton [] buttons = new JToggleButton[9];
 		
-		private MainGUI mainGUI;
+		//private MainGUI mainGUI;
 
 		public ConfigPanel(MainGUI mainGUI)
 		{
-			this.mainGUI = mainGUI;
+			//this.mainGUI = mainGUI;
 			this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 			buildInfoPanel();
 			buildAssistantPanel();
