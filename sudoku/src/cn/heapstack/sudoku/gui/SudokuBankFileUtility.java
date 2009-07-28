@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,8 +53,8 @@ public class SudokuBankFileUtility {
     private void initSudokuBank1(HashMap<String, Question> sudokuBankMap)
     {
 		try {
-			URI uri = this.getClass().getResource(SudokuBankFileName).toURI();
-			BufferedReader br = new BufferedReader(new FileReader(new File(uri)));
+			InputStreamReader isr = new InputStreamReader(this.getClass().getResourceAsStream(SudokuBankFileName));
+		    BufferedReader br = new BufferedReader(isr);
 			String line = br.readLine();
 			while(line!=null&& !line.isEmpty())
 			{
@@ -64,8 +65,6 @@ public class SudokuBankFileUtility {
 				line = br.readLine();
 			}
 			br.close();
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
