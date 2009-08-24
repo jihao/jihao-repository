@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget  xmlns="http://www.jil.org/ns/widgets"
+         id="http://jil.org/wid/5a9f9fb4b9b594659ed852b77521b3c4f32800d477ba3039c89045cf869807d/数独"
+         version="01.00.beta"
+         height="428"
+         width="320">
+    <name>数独</name>
+    <description>数独是一种数字游戏，在9×9的方格中，填入1-9这九个数字，规则是：每一行，每一列，每个小的九宫格中，1-9只能出现一次！</description>
+    <author email="hao.ji@139.com">季浩</author>
+    <license href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache v2</license>
+    <maximum_display_mode height="428" width="320"/>
+    <update href="http://www.jil.org/widgets/" period="2"/>
+    <icon src="Icon.png"/>
+    <content src="Sudoku.html"/>
+    <access network="false" localfs="false" remote_scripts="false"/>
+    <billing required="true"/>
+</widget>
