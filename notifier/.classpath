@@ -9,6 +9,7 @@
 	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar" sourcepath="F:/java_design_env/3pps/httpcomponents-client-4.0.1-src.zip"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.0.1.jar"/>
+	<classpathentry kind="lib" path="lib/mail.jar" sourcepath="F:/java_design_env/3pps/javamail-1.4.3/javamail-1.4.3/docs/javadocs"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

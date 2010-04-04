@@ -1,4 +1,4 @@
-package com.haojii.notifier;
+package com.haojii.notifier.easytv;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Observable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,28 +17,21 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-public class EasytvParser extends Observable {
-	private Item item;
+import com.haojii.notifier.ObservableTask;
+
+public class EasytvParserTask extends ObservableTask {
+	private EasytvEntity easytvEntity;
 	
-	public EasytvParser(Item item) {
-		this.item = item;
-	}
-
-	public Item getItem() {
-		return item;
-	}
-
-	public void setItem(Item item) {
-		this.item = item;
+	public EasytvParserTask(EasytvEntity easytvEntity) {
+		this.easytvEntity = easytvEntity;
 	}
 
 	
-	
-	public void checkForUpdate() {
+	private void checkForUpdate() {
 		try {
 			
 			//URI uri = URIUtils.createURI("http", "easytv.echinatv.com.cn/", -1,"/ItemDet.aspx", "IID=" + id, null);
-			URI uri = new URI(item.url);
+			URI uri = new URI(easytvEntity.url);
 			HttpGet httpget = new HttpGet(uri);
 			HttpClient httpclient = new DefaultHttpClient();
 			HttpResponse response = httpclient.execute(httpget);
@@ -47,7 +39,7 @@ public class EasytvParser extends Observable {
 
 			if (entity != null) {
 				entity = new BufferedHttpEntity(entity);
-				System.out.println(entity.getContentLength());
+				//System.out.println(entity.getContentLength());
 				InputStream instream = entity.getContent();
 				try {
 
@@ -71,11 +63,17 @@ public class EasytvParser extends Observable {
 								startSearching = false;
 								Matcher m = p.matcher(line);
 								if (m.find() && p2.matcher(line).find()) {
-									
-									System.out.println("1->" + m.group(1));
-									System.out.println("2->" + m.group(2));
+									String value = m.group(1);
+									String key = m.group(2);
+									//System.out.println("1->" + m.group(1));
+									//System.out.println("2->" + m.group(2));
+									//easytvEntity.newLinksMap.put(key, value);
+									EasytvItem item = new EasytvItem(key, value);
+									if(!easytvEntity.items.contains(item))
+									{
+										easytvEntity.newItems.add(item);
+									}
 								}
-
 							//sb.append(line.trim());
 							//sb.append("\n");
 						}
@@ -106,6 +104,12 @@ public class EasytvParser extends Observable {
 				// shut down the connection manager to ensure
 				// immediate deallocation of all system resources
 				httpclient.getConnectionManager().shutdown();
+				
+				if(easytvEntity.newItems.size()>0)
+				{
+					this.setChanged();
+					this.notifyObservers(easytvEntity);
+				}
 			}
 
 		} catch (URISyntaxException e) {
@@ -118,5 +122,9 @@ public class EasytvParser extends Observable {
 			e.printStackTrace();
 		}
 
+	}
+
+	public void doTask() {
+		checkForUpdate();
 	}
 }
